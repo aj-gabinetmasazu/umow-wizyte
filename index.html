@@ -36,7 +36,7 @@ async function slots(){
  if(!date){return}
  const {data,error}=await sb.rpc('get_available_slots',{p_workspace_id:W,p_date:date,p_duration:duration});
  if(error){$('slots').innerHTML='<span class="err">Nie udało się pobrać terminów.</span>';return}
- $('slots').innerHTML=(data||[]).map(t=>`<button class="slot" data-time="${t}">${t}</button>`).join('')||'<span>Brak wolnych terminów.</span>';
+ $('slots').innerHTML=(data||[]).map(row=>row.slot_time).filter(Boolean).map(t=>`<button class="slot" data-time="${t}">${t}</button>`).join('')||'<span>Brak wolnych terminów.</span>';
  document.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{document.querySelectorAll('.slot').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');selected=b.dataset.time});
 }
 $('date').onchange=slots;$('service').onchange=slots;
