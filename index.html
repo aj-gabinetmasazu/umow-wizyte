@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#6b1530"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Umów wizytę</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f1e8;color:#3a2430;font-family:Arial,sans-serif}
+header{background:#6b1530;color:#f5d78f;text-align:center;padding:22px}h1{margin:0;font-size:24px}.wrap{max-width:650px;margin:auto;padding:16px}
+.card{background:#fff;border:1px solid #dbc8a4;padding:16px;margin:14px 0}label{display:block;font-weight:bold;font-size:13px;margin:9px 0 5px}
+input,select,textarea,button{width:100%;padding:11px;border:1px solid #bfa77e;border-radius:0;font:inherit}button{background:#6b1530;color:#f7df9c;font-weight:bold;margin-top:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.slot{margin:0;background:#fff;color:#6b1530}.slot.selected{background:#6b1530;color:#f7df9c}
+.notice{padding:10px;background:#efe4d0;margin:10px 0}.ok{color:#216b3a}.err{color:#a51f2d}@media(max-width:520px){.grid{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<header><h1>Umów wizytę</h1><div style="margin-top:6px">Wybierz dogodny termin</div></header>
+<div class="wrap">
+<div class="card">
+<label>Usługa</label><select id="service"><option value="60">Wizyta — 60 min</option><option value="30">Wizyta — 30 min</option><option value="90">Wizyta — 90 min</option></select>
+<label>Data</label><input id="date" type="date">
+<div class="notice">Dostępne godziny:</div><div id="slots" class="slots"></div>
+</div>
+<div class="card">
+<h2 style="margin-top:0">Twoje dane</h2>
+<label>Imię i nazwisko</label><input id="name" autocomplete="name">
+<div class="grid"><div><label>Telefon</label><input id="phone" type="tel" autocomplete="tel"></div><div><label>E-mail</label><input id="email" type="email" autocomplete="email"></div></div>
+<label>Rodzaj usługi</label><input id="serviceName" placeholder="np. konsultacja">
+<label>Uwagi</label><textarea id="note" rows="3"></textarea>
+<button id="book">Zarezerwuj wizytę</button><div id="msg" class="notice"></div>
+</div></div>
+<script>
+const C=window.TERM_CONFIG, sb=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_PUBLISHABLE_KEY), W=C.WORKSPACE_ID;
+const $=id=>document.getElementById(id); let selected='';
+function today(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+$('date').min=today();$('date').value=today();
+async function slots(){
+ selected=''; $('slots').innerHTML='Ładowanie…';
+ const date=$('date').value, duration=Number($('service').value);
+ if(!date){return}
+ const {data,error}=await sb.rpc('get_available_slots',{p_workspace_id:W,p_date:date,p_duration:duration});
+ if(error){$('slots').innerHTML='<span class="err">Nie udało się pobrać terminów.</span>';return}
+ $('slots').innerHTML=(data||[]).map(t=>`<button class="slot" data-time="${t}">${t}</button>`).join('')||'<span>Brak wolnych terminów.</span>';
+ document.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{document.querySelectorAll('.slot').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');selected=b.dataset.time});
+}
+$('date').onchange=slots;$('service').onchange=slots;
+$('book').onclick=async()=>{
+ const name=$('name').value.trim(),phone=$('phone').value.trim(),email=$('email').value.trim(),service=$('serviceName').value.trim(),date=$('date').value,dur=Number($('service').value),note=$('note').value.trim();
+ if(!name||!phone||!email||!date||!selected){$('msg').innerHTML='<span class="err">Uzupełnij dane i wybierz godzinę.</span>';return}
+ const {data,error}=await sb.rpc('book_appointment',{p_workspace_id:W,p_client_name:name,p_phone:phone,p_email:email,p_service:service,p_date:date,p_time:selected,p_duration:dur,p_note:note});
+ if(error){$('msg').innerHTML='<span class="err">'+error.message+'</span>';slots();return}
+ $('msg').innerHTML='<span class="ok"><b>Wizyta została zarezerwowana.</b><br>Termin: '+date+' '+selected+'.</span>';
+ $('name').value='';$('phone').value='';$('email').value='';$('serviceName').value='';$('note').value='';selected='';slots();
+}
+slots();
+</script></body></html>

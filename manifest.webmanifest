@@ -1,0 +1,20 @@
+{
+  "name": "Umów wizytę",
+  "short_name": "Umów wizytę",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f1e8",
+  "theme_color": "#6b1530",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
