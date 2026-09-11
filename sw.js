@@ -1,1 +1,8 @@
-const CACHE='terminarz-v1';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./config.js','./manifest.webmanifest']))));self.addEventListener('fetch',e=>{if(e.request.method==='GET'&&e.request.url.startsWith(self.location.origin))e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./index.html'))))});
+const CACHE="umow-wizyte-pwa-v1";
+const APP=["./","./index.html","./config.js","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
+self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(APP)).then(()=>self.skipWaiting())));
+self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
+self.addEventListener("fetch",e=>{
+  if(e.request.method!=="GET") return;
+  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+});
