@@ -1,340 +1,302 @@
 <!doctype html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#64152d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
-<title>Umów wizytę</title>
+<html lang="pl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#64152d"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>Terminarz wizyt – panel</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;min-height:100%;font-family:Arial,sans-serif;background:#f7f1e8;color:#3a2430}
-body{padding-bottom:25px}
-header{background:#64152d;color:#f2d18b;text-align:center;padding:22px 14px}
-h1{margin:0;font-size:25px}
-header div{margin-top:6px;font-size:16px}
-.wrap{max-width:680px;margin:auto;padding:14px}
-.card{background:#fff;border:1px solid #d8c8aa;padding:16px;margin:13px 0}
-label{display:block;font-weight:bold;font-size:13px;margin:9px 0 5px}
-input,select,textarea,button{width:100%;padding:11px;border:1px solid #bfa77e;border-radius:0;font:inherit;background:#fff}
-input:focus,select:focus,textarea:focus{outline:2px solid #e2c77f;outline-offset:1px}
-button{background:#64152d;color:#f2d18b;font-weight:bold;margin-top:11px;cursor:pointer}
-button:disabled{opacity:.55;cursor:not-allowed}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.slot{margin:0;background:#fff;color:#64152d;min-height:43px}
-.slot.selected{background:#64152d;color:#f2d18b}
-.notice{padding:10px;background:#efe4d0;margin:10px 0}
-.ok{color:#216b3a}
-.err{color:#a51f2d}
-.warn{color:#7a4a00}
-.small{font-size:12px;color:#75695f}
-.empty{padding:12px;border:1px solid #d8c8aa;background:#f8f3ea}
-.hidden{display:none}
-.status-title{font-weight:bold;margin-bottom:4px}
-@media(max-width:520px){
-  .grid{grid-template-columns:1fr}
-  .slots{grid-template-columns:repeat(2,1fr)}
-  h1{font-size:23px}
-  .wrap{padding:10px}
-  .card{padding:13px}
+:root{--b:#64152d;--bd:#3d0b1c;--g:#d7ad55;--bg:#f6f0e5;--card:#fffdf8;--ink:#24151a;--line:#d8c8aa;--muted:#74695d;--ok:#315b2c;--okbg:#edf5e8;--bad:#7a2424;--badbg:#f8e7e7;--pend:#765b36;--pendbg:#fff4cf}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}body{padding-top:64px}.top{position:fixed;z-index:30;top:0;left:0;right:0;height:64px;background:linear-gradient(90deg,var(--bd),var(--b));color:#fff;display:flex;align-items:center;padding:0 12px;box-shadow:0 2px 10px #0003}.top h1{font-size:18px;margin:0}.top .spacer{flex:1}.top button{margin-left:8px}
+button,input,select,textarea{font:inherit}button{border:1px solid var(--g);background:linear-gradient(#8b2443,var(--b));color:#fff;padding:10px 13px;font-weight:bold;border-radius:0;min-height:42px;cursor:pointer}button.secondary{background:#fff;color:var(--b);border-color:var(--line)}button.danger{background:#7a2424;border-color:#b87979}button.smallBtn{min-height:36px;padding:7px 10px;font-size:12px}button:disabled{opacity:.55;cursor:not-allowed}input,select,textarea{width:100%;padding:10px;border:1px solid #bfae8f;background:#fff;border-radius:0;color:var(--ink)}textarea{min-height:70px;resize:vertical}label{display:block;font-size:13px;font-weight:bold;margin:9px 0 4px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions>*{flex:1}.wrap{max-width:1200px;margin:auto;padding:10px}.hidden{display:none!important}.notice{font-size:12px;padding:9px 10px;border:1px solid var(--g);background:var(--pendbg);color:var(--b);margin-bottom:12px}.notice.err{border-color:#d5a0a0;background:var(--badbg);color:var(--bad)}
+.tabs{display:none}.tab{white-space:nowrap;background:#eee5d5;color:var(--b);border:1px solid var(--line);border-bottom:0}.tab.active{background:var(--b);color:#fff}.panel{display:none}.panel.active{display:block}.grid2{display:grid;grid-template-columns:330px 1fr;gap:12px}.card{background:var(--card);border:1px solid var(--line);padding:14px;box-shadow:0 2px 8px #0001}.card h2{margin:0 0 12px;color:var(--b);font-size:18px}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:8px}.muted{color:var(--muted);font-size:12px}.count{font-size:12px;color:var(--pend);font-weight:bold}.tableWrap{overflow:auto}.table{width:100%;border-collapse:collapse;background:#fff}.table th,.table td{border-bottom:1px solid #e4dac7;padding:9px;text-align:left;vertical-align:top;font-size:13px}.table th{color:var(--b);background:#f3eee5}.statusBadge{display:inline-block;padding:4px 8px;border:1px solid var(--line);font-size:11px;font-weight:bold}.statusBadge.pending{background:var(--pendbg);color:var(--pend);border-color:var(--g)}.statusBadge.confirmed{background:var(--okbg);color:var(--ok);border-color:#9fbd8e}.statusBadge.rejected{background:var(--badbg);color:var(--bad);border-color:#d5a0a0}
+.monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.monthbar strong{text-transform:capitalize;color:var(--b);font-size:18px}.monthbar button{width:45px}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.dow{text-align:center;font-size:11px;font-weight:bold;color:#765b36;padding:4px}.day{min-height:96px;background:#fff;border:1px solid var(--line);padding:5px;cursor:pointer}.day.muted{background:#f3eee5;color:#aaa}.day.today{outline:2px solid var(--g);outline-offset:-2px}.day.sel{background:#fff2c8}.num{font-weight:bold;font-size:12px}.appt{font-size:10px;margin-top:4px;padding:3px 4px;color:#fff;border-left:3px solid var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.appt.pending{background:#8a683b}.appt.confirmed{background:#3d6b36}.appt.rejected{background:#7a2424}.dayOff{background:#f8e7e7!important;border-color:#d5a0a0!important}.dayOff .num{color:var(--bad)}
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.serviceRow,.offRow,.hourRow{display:grid;grid-template-columns:1.5fr .7fr .7fr auto;gap:8px;align-items:end;border-bottom:1px solid #e4dac7;padding:10px 0}.hourRow{grid-template-columns:1.2fr .8fr .8fr .7fr}.offRow{grid-template-columns:1fr 1fr 1.5fr auto}.toggle{display:flex;align-items:center;gap:6px;font-size:13px}.toggle input{width:auto}.empty{text-align:center;padding:22px;color:#887d70}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px}.dot{display:inline-block;width:10px;height:10px;border:1px solid #777;margin-right:4px;vertical-align:middle}.dot.pending{background:#8a683b}.dot.confirmed{background:#3d6b36}.dot.rejected{background:#7a2424}.dot.off{background:#f8e7e7;border-color:#d5a0a0}
+#login{max-width:420px;margin:70px auto}.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.help{font-size:12px;color:var(--muted);margin-top:5px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.serviceRow,.hourRow,.offRow{grid-template-columns:1fr 1fr}.serviceRow .actions,.hourRow .actions,.offRow .actions{grid-column:1/-1}}
+@media(max-width:560px){body{padding-top:58px}.top{height:58px}.top h1{font-size:15px}.wrap{padding:7px}.row,.settingsGrid,.filters{grid-template-columns:1fr}.day{min-height:68px}.appt{display:none}.day.has:after{content:"•";display:block;color:var(--b);font-size:22px}.table th,.table td{font-size:12px;padding:7px}.tabs{margin-left:-7px;margin-right:-7px;padding-left:7px}}
+
+/* ===== NOWE MENU: tylko wygląd/nawigacja ===== */
+body{padding-left:220px;overflow-x:hidden}
+.top{padding-left:16px}
+.menuToggle{display:none;border:0;background:transparent;padding:5px 10px;font-size:24px;min-height:42px}
+.sideNav{position:fixed;z-index:25;top:64px;left:0;bottom:0;width:220px;background:linear-gradient(180deg,var(--bd),var(--b));border-right:2px solid var(--g);padding:14px 10px;box-shadow:3px 0 14px #0002}
+.sideLogo{display:flex;align-items:center;justify-content:center;gap:10px;padding:4px 4px 17px;margin-bottom:10px;border-bottom:1px solid #d7ad5580}
+.logoMark{width:42px;height:42px;border:2px solid var(--g);display:flex;align-items:center;justify-content:center;color:var(--g);font-size:15px;font-weight:bold;letter-spacing:1px;background:#ffffff08}
+.logoText{color:#fff;font-size:12px;line-height:1.25;font-weight:bold;letter-spacing:1.5px;text-align:left}
+.logoText span{color:var(--g)}
+.sideTitle{color:var(--g);font-size:10px;font-weight:bold;letter-spacing:2px;text-align:center;padding:2px 0 8px;margin-bottom:5px}
+.sideItem{width:100%;display:flex;align-items:center;gap:11px;text-align:left;background:transparent;border:1px solid transparent;color:#fff;padding:12px 13px;margin:3px 0;font-size:13px}
+.sideItem:hover{background:#ffffff12;border-color:#d7ad5560}
+.sideItem.active{background:#8b2443;border-color:var(--g);box-shadow:inset 4px 0 0 var(--g)}
+.navShade{display:none}
+
+@media(max-width:900px){
+  body{padding-left:0}
+  .menuToggle{display:block}
+  .sideNav{top:58px;transform:translateX(-100%);transition:transform .22s ease;width:245px}
+  .sideNav.open{transform:translateX(0)}
+  .navShade.show{display:none}
+  body.menuOpen .top,
+  body.menuOpen #login,
+  body.menuOpen #app{transform:translateX(245px)}
+  body .top,
+  body #login,
+  body #app{transition:transform .22s ease}
 }
-</style>
-</head>
+
+/* ===== MENU GÓRNE + BOCZNE JAKO JEDEN PANEL ===== */
+.top{z-index:40}
+.sideNav{z-index:35;top:64px}
+.menuToggle{position:relative;width:46px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:6px;align-items:center}
+.menuToggle span{display:block;width:23px;height:2px;background:#fff;transition:transform .2s ease,opacity .2s ease}
+body.menuOpen .menuToggle span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+body.menuOpen .menuToggle span:nth-child(2){opacity:0}
+body.menuOpen .menuToggle span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+@media(min-width:901px){
+  .menuToggle{display:flex}
+  body{padding-left:220px}
+}
+@media(max-width:900px){
+  .menuToggle{display:flex}
+  body{padding-left:0}
+  .sideNav{top:58px}
+}
+
+/* ===== BOCZNE + GÓRNE MENU: OBOK SIEBIE I POŁĄCZONE ===== */
+body{padding-left:0;overflow-x:hidden}
+.top{left:0;right:0;transition:left .22s ease,transform .22s ease}
+.sideNav{top:0;bottom:0;transform:translateX(-100%);transition:transform .22s ease;width:220px}
+.sideNav.open{transform:translateX(0)}
+.menuToggle{display:flex}
+body.menuOpen .top{left:220px}
+body.menuOpen #login,body.menuOpen #app{transform:translateX(220px)}
+body #login,body #app{transition:transform .22s ease}
+@media(max-width:900px){
+  body{padding-left:0}
+  .top{left:0}
+  .sideNav{top:0;width:245px}
+  body.menuOpen .top{left:245px}
+  body.menuOpen #login,body.menuOpen #app{transform:translateX(245px)}
+}
+
+/* ===== POPRAWKA MOBILE: GÓRNE I BOCZNE MENU JAKO JEDEN ELEMENT ===== */
+@media(max-width:900px){
+  .top{
+    left:0 !important;
+    width:100% !important;
+    transform:translateX(0);
+    transition:transform .22s ease !important;
+  }
+  .sideNav{
+    top:0 !important;
+    left:0 !important;
+    height:100vh !important;
+    bottom:auto !important;
+    width:245px !important;
+    transform:translateX(-100%) !important;
+    transition:transform .22s ease !important;
+    z-index:45 !important;
+    padding-top:calc(14px + env(safe-area-inset-top));
+  }
+  .sideNav.open{
+    transform:translateX(0) !important;
+  }
+  body.menuOpen .top{
+    transform:translateX(245px) !important;
+    left:0 !important;
+  }
+  body.menuOpen #login,
+  body.menuOpen #app{
+    transform:translateX(245px) !important;
+  }
+  .menuToggle{position:relative;z-index:50}
+}
+</style></head>
 <body>
-<header>
-  <h1>Umów wizytę</h1>
-  <div>Wybierz usługę, dzień i wolną godzinę</div>
+<header class="top">
+<button type="button" id="menuToggle" class="menuToggle" aria-label="Otwórz menu"><span></span><span></span><span></span></button>
+<h1>TERMINARZ WIZYT</h1>
+<div class="spacer"></div>
+<button id="logout" class="hidden">Wyloguj</button>
 </header>
-
-<div class="wrap">
-  <div class="card">
-    <label for="service">Usługa</label>
-    <select id="service"></select>
-
-    <label for="date">Data</label>
-    <input id="date" type="date">
-
-    <div class="notice" id="slotsTitle">Dostępne godziny:</div>
-    <div id="dayInfo" class="small"></div>
-    <div id="slots" class="slots"></div>
-  </div>
-
-  <div class="card">
-    <h2 style="margin-top:0">Twoje dane</h2>
-    <label for="name">Imię i nazwisko</label>
-    <input id="name" autocomplete="name" required>
-
-    <div class="grid">
-      <div>
-        <label for="phone">Telefon</label>
-        <input id="phone" type="tel" autocomplete="tel" required>
-      </div>
-      <div>
-        <label for="email">E-mail</label>
-        <input id="email" type="email" autocomplete="email" required>
-      </div>
-    </div>
-
-    <label for="note">Uwagi</label>
-    <textarea id="note" rows="3"></textarea>
-
-    <button id="book" disabled>Wyślij rezerwację</button>
-    <div id="msg" class="notice">Rezerwacja wymaga potwierdzenia przez właściciela.</div>
-  </div>
+<aside id="sideNav" class="sideNav">
+<div class="sideLogo">
+  <div class="logoMark">TV</div>
+  <div class="logoText">TERMINARZ<br><span>WIZYT</span></div>
 </div>
-
+<div class="sideTitle">MENU</div>
+<button type="button" class="sideItem active" data-panel="calendarPanel">📅 <span>Terminarz</span></button>
+<button type="button" class="sideItem" data-panel="visitsPanel">📋 <span>Wizyty</span></button>
+<button type="button" class="sideItem" data-panel="servicesPanel">✦ <span>Usługi</span></button>
+<button type="button" class="sideItem" data-panel="hoursPanel">◷ <span>Godziny pracy</span></button>
+<button type="button" class="sideItem" data-panel="offPanel">☀ <span>Dni wolne</span></button>
+<button type="button" class="sideItem" data-panel="settingsPanel">⚙ <span>Ustawienia</span></button>
+</aside>
+<div id="navShade" class="navShade"></div>
+<section id="login" class="card">
+<h2>Logowanie</h2><div class="notice">Wspólna baza online – zaloguj się swoim kontem.</div>
+<label>E-mail</label><input id="email" type="email" autocomplete="username">
+<label>Hasło</label><input id="password" type="password" autocomplete="current-password">
+<div class="actions"><button id="loginBtn">Zaloguj</button><button id="signupBtn" class="secondary">Utwórz konto</button></div><div id="loginMsg" class="muted"></div>
+</section>
+<main id="app" class="wrap hidden">
+<div id="sync" class="notice">● Połączono z bazą online</div>
+<nav class="tabs">
+<button class="tab active" data-tab="calendarPanel">TERMINARZ</button><button class="tab" data-tab="visitsPanel">WIZYTY</button><button class="tab" data-tab="servicesPanel">USŁUGI</button><button class="tab" data-tab="hoursPanel">GODZINY PRACY</button><button class="tab" data-tab="offPanel">DNI WOLNE</button><button class="tab" data-tab="settingsPanel">USTAWIENIA</button>
+</nav>
+<section id="calendarPanel" class="panel active">
+<div class="grid2">
+<section class="card"><h2>Nowa wizyta</h2><form id="form">
+<label>Imię i nazwisko klienta</label><input id="client" required>
+<div class="row"><div><label>Data</label><input id="date" type="date" required></div><div><label>Godzina</label><input id="time" type="time" required></div></div>
+<label>Rodzaj wizyty</label><input id="service" placeholder="np. konsultacja">
+<div class="row"><div><label>Czas trwania</label><select id="duration"><option>30</option><option>45</option><option selected>60</option><option>90</option><option>120</option></select></div><div><label>Telefon</label><input id="phone" type="tel"></div></div>
+<label>E-mail klienta</label><input id="clientEmail" type="email" autocomplete="email"><label>Notatka</label><textarea id="note"></textarea>
+<div class="actions"><button>+ Umów wizytę</button><button type="button" id="clear" class="secondary">Wyczyść</button></div></form></section>
+<section class="card"><div class="monthbar"><button id="prev">‹</button><strong id="title"></strong><button id="next">›</button></div><div class="week" id="calendar"></div><div class="legend"><span><i class="dot pending"></i>Oczekuje</span><span><i class="dot confirmed"></i>Potwierdzona</span><span><i class="dot rejected"></i>Odrzucona</span><span><i class="dot off"></i>Dzień wolny</span></div></section>
+<section class="card" style="grid-column:1/-1"><div class="sectionTitle"><h2>Wizyty: <span id="selectedLabel"></span></h2><span class="count" id="count"></span></div><div id="dayList"></div></section>
+</div></section>
+<section id="visitsPanel" class="panel"><section class="card"><div class="sectionTitle"><h2>Wszystkie wizyty</h2><span class="count" id="allCount"></span></div>
+<div class="filters"><input id="visitSearch" placeholder="Szukaj: klient, telefon, e-mail"><select id="visitStatus"><option value="">Wszystkie statusy</option><option value="oczekuje">Oczekujące</option><option value="potwierdzona">Potwierdzone</option><option value="odrzucona">Odrzucone</option></select><input id="visitFrom" type="date" title="Od"><input id="visitTo" type="date" title="Do"></div><div class="actions" style="margin-top:0"><button id="clearVisitFilters" class="secondary smallBtn">Wyczyść filtry</button></div><div class="tableWrap"><table class="table"><thead><tr><th>Data</th><th>Godzina</th><th>Klient</th><th>Usługa</th><th>Kontakt</th><th>Status</th><th>Akcje</th></tr></thead><tbody id="visitsTable"></tbody></table></div></section></section>
+<section id="servicesPanel" class="panel"><section class="card"><h2>Usługi</h2><form id="serviceForm"><div class="row"><div><label>Nazwa usługi</label><input id="serviceName" required></div><div><label>Czas trwania (min)</label><input id="serviceMinutes" type="number" min="5" step="5" value="30" required></div></div><label class="toggle"><input id="serviceActive" type="checkbox" checked> Usługa aktywna</label><div class="actions"><button id="serviceSaveBtn">Dodaj usługę</button><button type="button" id="serviceCancel" class="secondary hidden">Anuluj edycję</button></div><div id="serviceMsg" class="help"></div></form><div id="servicesList"></div></section></section>
+<section id="hoursPanel" class="panel"><section class="card"><h2>Godziny pracy</h2><div class="help">Ustaw godziny dla każdego dnia. Wyłącz dzień, jeśli nie przyjmujesz wtedy wizyt.</div><div id="hoursList"></div><div class="actions"><button id="saveHours">Zapisz godziny pracy</button></div><div id="hoursMsg" class="help"></div></section></section>
+<section id="offPanel" class="panel"><section class="card"><h2>Dni wolne / urlop</h2><form id="offForm"><div class="row"><div><label>Od</label><input id="offFrom" type="date" required></div><div><label>Do</label><input id="offTo" type="date" required></div></div><label>Opis</label><input id="offDesc" placeholder="np. Urlop"><div class="actions"><button>Dodaj dzień wolny</button></div><div id="offMsg" class="help"></div></form><div id="offList"></div></section></section>
+<section id="settingsPanel" class="panel"><section class="card"><h2>Ustawienia</h2><div class="help">Te podstawowe dane są zapisywane w bazie Supabase dla tego terminarza. Dzięki temu ustawienia są wspólne dla urządzeń.</div><form id="settingsForm" class="settingsGrid"><div><label>Nazwa terminarza</label><input id="setName"></div><div><label>Nazwa osoby / gabinetu</label><input id="setOwner"></div><div><label>Telefon kontaktowy</label><input id="setPhone"></div><div><label>E-mail kontaktowy</label><input id="setEmail" type="email"></div><div style="grid-column:1/-1"><label>Informacja dla klienta</label><textarea id="setMessage" placeholder="Np. Wybierz dogodny termin i usługę."></textarea></div><div style="grid-column:1/-1" class="actions"><button>Zapisz ustawienia</button></div></form><div id="settingsMsg" class="help"></div></section></section>
+</main>
 <script>
-'use strict';
 
-const C = window.TERM_CONFIG || {};
-const sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_PUBLISHABLE_KEY);
-const W = C.WORKSPACE_ID;
-const $ = id => document.getElementById(id);
-
-let services = [];
-let workHours = [];
-let daysOff = [];
-let selected = '';
-let loadingSlots = false;
-
-const pad = n => String(n).padStart(2,'0');
-
-function localISODate(d = new Date()) {
-  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-}
-
-function esc(value) {
-  return String(value ?? '').replace(/[&<>'"]/g, ch => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
-  }[ch]));
-}
-
-function setMessage(html, cls='') {
-  $('msg').className = 'notice' + (cls ? ' ' + cls : '');
-  $('msg').innerHTML = html;
-}
-
-function dayIndex(dateString) {
-  // JS: Sun=0..Sat=6 -> app/Supabase: Mon=0..Sun=6
-  const d = new Date(dateString + 'T12:00:00');
-  return (d.getDay() + 6) % 7;
-}
-
-function formatDatePL(dateString) {
-  if (!dateString) return '';
-  const d = new Date(dateString + 'T12:00:00');
-  return new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d);
-}
-
-function isDayOff(dateString) {
-  return daysOff.find(x => dateString >= x.od && dateString <= x.do);
-}
-
-function getHoursForDate(dateString) {
-  const dow = dayIndex(dateString);
-  return workHours.find(x => Number(x.dzien_tygodnia) === dow && x.aktywne === true);
-}
-
-async function loadServices() {
-  const {data,error} = await sb
-    .from('uslugi')
-    .select('id,nazwa,czas_trwania')
-    .eq('workspace_id', W)
-    .eq('aktywna', true)
-    .order('nazwa');
-
-  if (error) {
-    setMessage('<span class="err">Nie udało się pobrać usług: ' + esc(error.message) + '</span>','err');
-    return false;
-  }
-
-  services = data || [];
-  $('service').innerHTML = services.length
-    ? services.map(s => `<option value="${esc(s.id)}">${esc(s.nazwa)} — ${esc(s.czas_trwania)} min</option>`).join('')
-    : '<option value="">Brak dostępnych usług</option>';
-  return true;
-}
-
-async function loadRules() {
-  const [hoursResult, offResult] = await Promise.all([
-    sb.from('godziny_pracy')
-      .select('dzien_tygodnia,od,do,aktywne')
-      .eq('workspace_id', W),
-    sb.from('dni_wolne')
-      .select('od,do,opis')
-      .eq('workspace_id', W)
-      .order('od')
-  ]);
-
-  if (hoursResult.error) {
-    setMessage('<span class="err">Nie udało się pobrać godzin pracy: ' + esc(hoursResult.error.message) + '</span>','err');
-    return false;
-  }
-  if (offResult.error) {
-    setMessage('<span class="err">Nie udało się pobrać dni wolnych: ' + esc(offResult.error.message) + '</span>','err');
-    return false;
-  }
-
-  workHours = hoursResult.data || [];
-  daysOff = offResult.data || [];
-  return true;
-}
-
-function renderDayMessage() {
-  const date = $('date').value;
-  const off = isDayOff(date);
-  const hours = getHoursForDate(date);
-
-  if (off) {
-    $('dayInfo').innerHTML = `<span class="warn"><b>Ten dzień jest wolny.</b>${off.opis ? ' — ' + esc(off.opis) : ''}</span>`;
-    return 'off';
-  }
-  if (!hours) {
-    $('dayInfo').innerHTML = '<span class="warn"><b>Tego dnia nie przyjmujemy rezerwacji.</b></span>';
-    return 'closed';
-  }
-  $('dayInfo').textContent = `Godziny pracy: ${String(hours.od).slice(0,5)}–${String(hours.do).slice(0,5)}`;
-  return 'open';
-}
-
-async function slots() {
-  selected = '';
-  $('book').disabled = true;
-  const date = $('date').value;
-  const sid = $('service').value;
-  const svc = services.find(x => x.id === sid);
-
-  $('slots').innerHTML = '<div class="empty">Sprawdzam dostępne godziny…</div>';
-  if (!svc || !date) return;
-
-  const state = renderDayMessage();
-  if (state === 'off') {
-    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W wybranym dniu masz urlop / dzień wolny.</div>';
-    return;
-  }
-  if (state === 'closed') {
-    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W tym dniu nie ma ustawionych godzin pracy.</div>';
-    return;
-  }
-
-  loadingSlots = true;
-  try {
-    const {data,error} = await sb.rpc('get_available_slots', {
-      p_workspace_id: W,
-      p_date: date,
-      p_service_id: sid
-    });
-
-    if (error) {
-      $('slots').innerHTML = '<div class="empty"><span class="err">Nie udało się pobrać wolnych godzin: ' + esc(error.message) + '</span></div>';
-      return;
-    }
-
-    const list = data || [];
-    if (!list.length) {
-      $('slots').innerHTML = '<div class="empty"><b>Brak wolnych terminów.</b><br>Wybierz inny dzień lub usługę.</div>';
-      return;
-    }
-
-    $('slots').innerHTML = list.map(x => {
-      const t = typeof x === 'string' ? x : x.slot_time;
-      return `<button type="button" class="slot" data-time="${esc(t)}">${esc(t)}</button>`;
-    }).join('');
-
-    document.querySelectorAll('.slot').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.slot').forEach(x => x.classList.remove('selected'));
-        btn.classList.add('selected');
-        selected = btn.dataset.time;
-        $('book').disabled = false;
-        setMessage('Wybrany termin: <b>' + esc(formatDatePL(date)) + ' ' + esc(selected) + '</b>. Możesz teraz wysłać rezerwację.');
-      });
-    });
-  } finally {
-    loadingSlots = false;
-  }
-}
-
-async function bookAppointment() {
-  if (loadingSlots) return;
-
-  const svc = services.find(x => x.id === $('service').value);
-  const date = $('date').value;
-  const name = $('name').value.trim();
-  const phone = $('phone').value.trim();
-  const email = $('email').value.trim();
-  const note = $('note').value.trim();
-
-  if (!svc || !selected) {
-    setMessage('<span class="err">Wybierz usługę i wolną godzinę.</span>','err');
-    return;
-  }
-  if (!name || !phone || !email) {
-    setMessage('<span class="err">Uzupełnij imię i nazwisko, telefon oraz e-mail.</span>','err');
-    return;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setMessage('<span class="err">Wpisz prawidłowy adres e-mail.</span>','err');
-    return;
-  }
-  if (isDayOff(date)) {
-    setMessage('<span class="err">Ten dzień jest wolny i nie można zarezerwować wizyty.</span>','err');
-    await slots();
-    return;
-  }
-
-  $('book').disabled = true;
-  setMessage('Wysyłam rezerwację…');
-
-  const {error} = await sb.rpc('book_appointment', {
-    p_workspace_id: W,
-    p_client_name: name,
-    p_phone: phone,
-    p_email: email,
-    p_service: svc.nazwa,
-    p_date: date,
-    p_time: selected,
-    p_duration: svc.czas_trwania,
-    p_note: note
+/* ===== OBSŁUGA NOWEGO MENU — bez zmian w logowaniu i bazie ===== */
+function openPanel(panelId){
+  document.querySelectorAll('.sideItem').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.panel === panelId);
   });
+  document.querySelectorAll('.panel').forEach(function(panel){
+    panel.classList.remove('active');
+  });
+  var panel = document.getElementById(panelId);
+  if(panel) panel.classList.add('active');
+  if(window.innerWidth <= 900){
+    document.getElementById('sideNav').classList.remove('open');
+    document.body.classList.remove('menuOpen');
+    document.getElementById('navShade').classList.remove('show');
+  }
+}
+document.querySelectorAll('.sideItem').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    openPanel(btn.dataset.panel);
+  });
+});
+document.getElementById('menuToggle').addEventListener('click', function(){
+  var open = document.body.classList.toggle('menuOpen');
+  document.getElementById('sideNav').classList.toggle('open', open);
+  this.setAttribute('aria-label', open ? 'Zamknij menu' : 'Otwórz menu');
+});
+document.getElementById('navShade').addEventListener('click', function(){
+  document.getElementById('sideNav').classList.remove('open');
+  document.body.classList.remove('menuOpen');
+});
+const cfg=window.TERM_CONFIG||{};const sb=supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY);const WORKSPACE=cfg.WORKSPACE_ID;
+const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const plDate=s=>new Intl.DateTimeFormat('pl-PL',{dateStyle:'full'}).format(new Date(s+'T12:00:00'));
+const shortDate=s=>new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(s+'T12:00:00'));
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let view=new Date(),selected=new Date(),rows=[],services=[],hours=[],daysOff=[],editingServiceId=null;
+const days=['Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota','Niedziela'];document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')});
+function statusClass(s){return s==='oczekuje'?'pending':s==='odrzucona'?'rejected':'confirmed'}
+function statusLabel(s){return s==='oczekuje'?'oczekuje':s==='odrzucona'?'odrzucona':'potwierdzona'}
+function showMsg(id,text,err=false){$(id).textContent=text;$(id).className='help'+(err?' err':'')}
+function dayIndex(s){return (new Date(s+'T12:00:00').getDay()+6)%7}
+function isOff(s){return daysOff.find(x=>s>=x.od&&s<=x.do)}
+async function logged(){const {data}=await sb.auth.getSession();const user=data?.session?.user;if(user){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('logout').classList.remove('hidden');await refreshAll()}else{$('login').classList.remove('hidden');$('app').classList.add('hidden');$('logout').classList.add('hidden')}}
+async function refreshAll(){await Promise.all([loadVisits(),loadServices(),loadHours(),loadOff(),loadSettings()]);renderCalendar();renderDayList();renderVisitsTable();renderServices();renderHours();renderOff()}
+async function loadVisits(){const r=await sb.from('wizyty').select('*').eq('workspace_id',WORKSPACE).order('data').order('godzina');if(r.error){$('sync').textContent='Błąd wizyt: '+r.error.message;return}rows=r.data||[]}
+async function loadServices(){const r=await sb.from('uslugi').select('id,nazwa,czas_trwania,aktywna').eq('workspace_id',WORKSPACE).order('nazwa');if(!r.error)services=r.data||[]}
+async function loadHours(){const r=await sb.from('godziny_pracy').select('id,dzien_tygodnia,od,do,aktywne').eq('workspace_id',WORKSPACE).order('dzien_tygodnia');if(!r.error)hours=r.data||[]}
+async function loadOff(){const r=await sb.from('dni_wolne').select('id,od,do,opis').eq('workspace_id',WORKSPACE).order('od');if(!r.error)daysOff=r.data||[]}
+function renderCalendar(){const y=view.getFullYear(),m=view.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,daysIn=new Date(y,m+1,0).getDate(),c=$('calendar');c.innerHTML='';$('title').textContent=new Intl.DateTimeFormat('pl-PL',{month:'long',year:'numeric'}).format(first);['Pn','Wt','Śr','Cz','Pt','Sb','Nd'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;c.appendChild(e)});for(let i=0;i<42;i++){const n=i-start+1,d=new Date(y,m,n),s=iso(d),e=document.createElement('div');e.className='day'+(n<1||n>daysIn?' muted':'')+(s===iso(new Date())?' today':'')+(s===iso(selected)?' sel':'');if(isOff(s))e.classList.add('dayOff');const a=rows.filter(x=>x.data===s);if(a.length)e.classList.add('has');e.innerHTML='<div class="num">'+d.getDate()+'</div>'+a.slice(0,3).map(x=>'<div class="appt '+statusClass(x.status)+'">'+esc((x.godzina||'').slice(0,5))+' '+esc(x.klient)+'</div>').join('');e.onclick=()=>{if(n>=1&&n<=daysIn){selected=d;$('date').value=s;renderCalendar();renderDayList()}};c.appendChild(e)}}
+function actionButtons(x){const id=x.id,s=x.status||'potwierdzona';let h='<button class="smallBtn" data-action="delete" data-id="'+id+'">Usuń</button>';if(s==='oczekuje')h='<button class="smallBtn" data-action="confirm" data-id="'+id+'">Potwierdź</button><button class="smallBtn" data-action="reject" data-id="'+id+'">Odrzuć</button>'+h;else if(s==='potwierdzona')h='<button class="smallBtn" data-action="reject" data-id="'+id+'">Odrzuć</button>'+h;else h='<button class="smallBtn" data-action="confirm" data-id="'+id+'">Potwierdź</button>'+h;return h}
+function bindActions(root){root.querySelectorAll('[data-action]').forEach(b=>b.onclick=async()=>{const id=b.dataset.id,a=b.dataset.action;if(a==='delete'){if(!confirm('Usunąć tę wizytę?'))return;const r=await sb.from('wizyty').delete().eq('id',id);if(r.error)alert(r.error.message);else await refreshAll();return}const ns=a==='confirm'?'potwierdzona':'odrzucona';if(!confirm(ns==='potwierdzona'?'Potwierdzić tę wizytę?':'Odrzucić tę wizytę?'))return;const r=await sb.from('wizyty').update({status:ns}).eq('id',id);if(r.error)alert(r.error.message);else await refreshAll()})}
+function renderDayList(){const s=iso(selected),a=rows.filter(x=>x.data===s).sort((x,y)=>(x.godzina||'').localeCompare(y.godzina||''));$('selectedLabel').textContent=plDate(s);$('count').textContent=a.length?a.length+' '+(a.length===1?'wizyta':'wizyty'):'';$('dayList').innerHTML=a.length?a.map(x=>'<div class="item" style="border-top:1px solid #e4dac7;padding:11px 0"><b>'+esc((x.godzina||'').slice(0,5))+' — '+esc(x.klient)+'</b> <span class="muted">('+esc(x.czas_trwania??x.duration??x.czas??60)+' min)</span><div>'+esc(x.usluga||'Wizyta')+(x.telefon?' · '+esc(x.telefon):'')+'</div>'+(x.email?'<div class="muted">E-mail: <a href="mailto:'+encodeURIComponent(x.email)+'">'+esc(x.email)+'</a></div>':'')+'<div style="margin-top:5px"><span class="statusBadge '+statusClass(x.status)+'">'+statusLabel(x.status)+'</span></div>'+(x.notatka?'<div class="muted" style="margin-top:5px">'+esc(x.notatka)+'</div>':'')+'<div class="actions">'+actionButtons(x)+'</div></div>').join(''):'<div class="empty">Brak wizyt na ten dzień.</div>';bindActions($('dayList'))}
+function renderVisitsTable(){let a=[...rows];const q=$('visitSearch').value.trim().toLowerCase(),st=$('visitStatus').value,from=$('visitFrom').value,to=$('visitTo').value;if(q)a=a.filter(x=>[x.klient,x.telefon,x.email].some(v=>String(v||'').toLowerCase().includes(q)));if(st)a=a.filter(x=>(x.status||'potwierdzona')===st);if(from)a=a.filter(x=>x.data>=from);if(to)a=a.filter(x=>x.data<=to);a.sort((x,y)=>(x.data+x.godzina).localeCompare(y.data+y.godzina));$('allCount').textContent=a.length+' '+(a.length===1?'wizyta':'wizyt');$('visitsTable').innerHTML=a.length?a.map(x=>'<tr><td>'+shortDate(x.data)+'</td><td>'+esc((x.godzina||'').slice(0,5))+'</td><td><b>'+esc(x.klient)+'</b></td><td>'+esc(x.usluga||'Wizyta')+'<br><span class="muted">'+esc(x.czas_trwania??x.duration??x.czas??60)+' min</span></td><td>'+esc(x.telefon||'')+(x.email?'<br>'+esc(x.email):'')+'</td><td><span class="statusBadge '+statusClass(x.status)+'">'+statusLabel(x.status)+'</span></td><td><div class="actions" style="margin:0">'+actionButtons(x)+'</div></td></tr>').join(''):'<tr><td colspan="7" class="empty">Brak wizyt spełniających kryteria.</td></tr>';bindActions($('visitsTable'))}
+function renderServices(){const l=$('servicesList');l.innerHTML=services.length?services.map(s=>'<div class="serviceRow"><div><b>'+esc(s.nazwa)+'</b></div><div>'+esc(s.czas_trwania)+' min</div><div><span class="statusBadge '+(s.aktywna?'confirmed':'rejected')+'">'+(s.aktywna?'aktywna':'nieaktywna')+'</span></div><div class="actions" style="margin:0"><button class="smallBtn" data-service-edit="'+s.id+'">Edytuj</button><button class="smallBtn danger" data-service-delete="'+s.id+'">Usuń</button></div></div>').join(''):'<div class="empty">Brak usług.</div>';l.querySelectorAll('[data-service-edit]').forEach(b=>b.onclick=()=>{const s=services.find(x=>String(x.id)===b.dataset.serviceEdit);if(!s)return;editingServiceId=s.id;$('serviceName').value=s.nazwa;$('serviceMinutes').value=s.czas_trwania;$('serviceActive').checked=!!s.aktywna;$('serviceSaveBtn').textContent='Zapisz zmiany';$('serviceCancel').classList.remove('hidden')});l.querySelectorAll('[data-service-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Usunąć tę usługę?'))return;const r=await sb.from('uslugi').delete().eq('id',b.dataset.serviceDelete);if(r.error)showMsg('serviceMsg',r.error.message,true);else{showMsg('serviceMsg','Usługa usunięta.');await loadServices();renderServices()}})}
+function renderHours(){const defaults=[...Array(7)].map((_,i)=>hours.find(h=>Number(h.dzien_tygodnia)===i)||{dzien_tygodnia:i,od:'09:00',do:'17:00',aktywne:false});$('hoursList').innerHTML=defaults.map((h,i)=>'<div class="hourRow"><b>'+days[i]+'</b><input type="time" data-hour-from="'+i+'" value="'+esc((h.od||'').slice(0,5))+'"><input type="time" data-hour-to="'+i+'" value="'+esc((h.do||'').slice(0,5))+'"><label class="toggle"><input type="checkbox" data-hour-active="'+i+'" '+(h.aktywne?'checked':'')+'> Aktywny</label></div>').join('')}
+function renderOff(){const l=$('offList');l.innerHTML=daysOff.length?daysOff.map(x=>'<div class="offRow"><div><b>'+shortDate(x.od)+'</b></div><div><b>'+shortDate(x.do)+'</b></div><div>'+esc(x.opis||'Dzień wolny')+'</div><div class="actions" style="margin:0"><button class="smallBtn danger" data-off-delete="'+x.id+'">Usuń</button></div></div>').join(''):'<div class="empty">Brak ustawionych dni wolnych.</div>';l.querySelectorAll('[data-off-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Usunąć ten okres wolny?'))return;const r=await sb.from('dni_wolne').delete().eq('id',b.dataset.offDelete);if(r.error)showMsg('offMsg',r.error.message,true);else{showMsg('offMsg','Okres usunięty.');await loadOff();renderOff();renderCalendar()}})}
+async function loadSettings(){const r=await sb.from('ustawienia').select('*').eq('workspace_id',WORKSPACE).maybeSingle();if(r.error){showMsg('settingsMsg','Nie udało się wczytać ustawień: '+r.error.message,true);return}const x=r.data||{};$('setName').value=x.nazwa_terminarza||'Terminarz wizyt';$('setOwner').value=x.nazwa_osoby||'';$('setPhone').value=x.telefon||'';$('setEmail').value=x.email||'';$('setMessage').value=x.informacja_dla_klienta||''}
+$('settingsForm').onsubmit=async e=>{e.preventDefault();const payload={workspace_id:WORKSPACE,nazwa_terminarza:$('setName').value.trim()||'Terminarz wizyt',nazwa_osoby:$('setOwner').value.trim(),telefon:$('setPhone').value.trim(),email:$('setEmail').value.trim(),informacja_dla_klienta:$('setMessage').value.trim(),updated_at:new Date().toISOString()};const r=await sb.from('ustawienia').upsert(payload,{onConflict:'workspace_id'});if(r.error)showMsg('settingsMsg','Nie udało się zapisać ustawień: '+r.error.message,true);else showMsg('settingsMsg','Ustawienia zapisane w bazie Supabase.')};
+$('loginBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password){showMsg('loginMsg','Podaj e-mail i hasło.',true);return}showMsg('loginMsg','Logowanie...');$('loginBtn').disabled=true;const r=await sb.auth.signInWithPassword({email,password});$('loginBtn').disabled=false;if(r.error){showMsg('loginMsg','Błąd logowania: '+r.error.message,true);return}showMsg('loginMsg','');await logged()};
+$('signupBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password){showMsg('loginMsg','Podaj e-mail i hasło.',true);return}if(password.length<6){showMsg('loginMsg','Hasło musi mieć co najmniej 6 znaków.',true);return}showMsg('loginMsg','Tworzenie konta...');$('signupBtn').disabled=true;const r=await sb.auth.signUp({email,password});$('signupBtn').disabled=false;if(r.error){showMsg('loginMsg','Błąd tworzenia konta: '+r.error.message,true);return}if(r.data?.session){showMsg('loginMsg','Konto utworzone.');await logged()}else showMsg('loginMsg','Konto utworzone. Sprawdź e-mail, jeśli wymagana jest jego weryfikacja.');};
 
-  if (error) {
-    setMessage('<span class="err">' + esc(error.message) + '</span>','err');
-    await slots();
+
+/* ===== NAPRAWA: NOWA WIZYTA + STRZAŁKI KALENDARZA ===== */
+$('prev').onclick=function(){
+  view=new Date(view.getFullYear(),view.getMonth()-1,1);
+  renderCalendar();
+};
+$('next').onclick=function(){
+  view=new Date(view.getFullYear(),view.getMonth()+1,1);
+  renderCalendar();
+};
+
+$('clear').onclick=function(){
+  $('form').reset();
+  $('duration').value='60';
+  $('date').value=iso(selected);
+};
+
+$('form').onsubmit=async function(e){
+  e.preventDefault();
+  const client=$('client').value.trim();
+  const date=$('date').value;
+  const time=$('time').value;
+  const service=$('service').value.trim() || 'Wizyta';
+  const duration=Number($('duration').value||60);
+  const phone=$('phone').value.trim();
+  const email=$('clientEmail').value.trim();
+  const note=$('note').value.trim();
+
+  if(!client||!date||!time){
+    alert('Uzupełnij klienta, datę i godzinę.');
     return;
   }
 
-  const bookedTime = selected;
-  setMessage(`<span class="ok"><b>Rezerwacja została wysłana.</b><br>Termin: ${esc(formatDatePL(date))} ${esc(bookedTime)}.<br>Wizyta oczekuje na potwierdzenie.</span>`,'ok');
-  $('name').value = '';
-  $('phone').value = '';
-  $('email').value = '';
-  $('note').value = '';
-  await slots();
-}
+  const btn=$('form').querySelector('button:not([type="button"])');
+  if(btn) btn.disabled=true;
 
-$('service').addEventListener('change', slots);
-$('date').addEventListener('change', slots);
-$('book').addEventListener('click', bookAppointment);
+  try{
+    const payload={
+      workspace_id:WORKSPACE,
+      klient:client,
+      data:date,
+      godzina:time,
+      usluga:service,
+      czas_trwania:duration,
+      telefon:phone,
+      email:email,
+      notatka:note,
+      status:'oczekuje'
+    };
 
-(async function init(){
-  const t = localISODate();
-  $('date').min = t;
-  $('date').value = t;
-  setMessage('Łączenie z bazą online…');
+    const r=await sb.from('wizyty').insert(payload);
+    if(r.error){
+      alert('Nie udało się dodać wizyty: '+r.error.message);
+      return;
+    }
 
-  const okServices = await loadServices();
-  const okRules = await loadRules();
-  if (!okServices || !okRules) return;
+    selected=new Date(date+'T12:00:00');
+    view=new Date(selected.getFullYear(),selected.getMonth(),1);
+    $('form').reset();
+    $('duration').value='60';
+    $('date').value=date;
+    await refreshAll();
+    alert('Wizyta została dodana.');
+  }catch(err){
+    alert('Błąd dodawania wizyty: '+(err?.message||err));
+  }finally{
+    if(btn) btn.disabled=false;
+  }
+};
 
-  await slots();
-})();
-</script>
-</body>
-</html>
+sb.channel('terminarz-wizyty').on('postgres_changes',{event:'*',schema:'public',table:'wizyty',filter:'workspace_id=eq.'+WORKSPACE},()=>refreshAll()).subscribe();$('logout').onclick=async()=>{const r=await sb.auth.signOut();if(r.error)alert('Nie udało się wylogować: '+r.error.message);else await logged()};sb.auth.onAuthStateChange(()=>logged());$('date').value=iso(selected);logged();
+</script></body></html>
