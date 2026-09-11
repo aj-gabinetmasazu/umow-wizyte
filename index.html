@@ -1,1 +1,345 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#64152d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Umów wizytę</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>window.TERM_CONFIG={SUPABASE_URL:"https://oiabhlviecdkstuedmdp.supabase.co",SUPABASE_PUBLISHABLE_KEY:"sb_publishable_IoteuBlBG9exrD5ubm-z4A_9szDC9Md",WORKSPACE_ID:"11111111-1111-1111-1111-111111111111"};</script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;font-family:Arial,sans-serif;background:#f7f1e8;color:#3a2430}
+body{padding-bottom:25px}
+header{background:#64152d;color:#f2d18b;text-align:center;padding:22px 14px}
+h1{margin:0;font-size:25px}
+header div{margin-top:6px;font-size:16px}
+.wrap{max-width:680px;margin:auto;padding:14px}
+.card{background:#fff;border:1px solid #d8c8aa;padding:16px;margin:13px 0}
+label{display:block;font-weight:bold;font-size:13px;margin:9px 0 5px}
+input,select,textarea,button{width:100%;padding:11px;border:1px solid #bfa77e;border-radius:0;font:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid #e2c77f;outline-offset:1px}
+button{background:#64152d;color:#f2d18b;font-weight:bold;margin-top:11px;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{margin:0;background:#fff;color:#64152d;min-height:43px}
+.slot.selected{background:#64152d;color:#f2d18b}
+.notice{padding:10px;background:#efe4d0;margin:10px 0}
+.ok{color:#216b3a}
+.err{color:#a51f2d}
+.warn{color:#7a4a00}
+.small{font-size:12px;color:#75695f}
+.empty{padding:12px;border:1px solid #d8c8aa;background:#f8f3ea}
+.hidden{display:none}
+.status-title{font-weight:bold;margin-bottom:4px}
+@media(max-width:520px){
+  .grid{grid-template-columns:1fr}
+  .slots{grid-template-columns:repeat(2,1fr)}
+  h1{font-size:23px}
+  .wrap{padding:10px}
+  .card{padding:13px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Umów wizytę</h1>
+  <div>Wybierz usługę, dzień i wolną godzinę</div>
+</header>
 
+<div class="wrap">
+  <div class="card">
+    <label for="service">Usługa</label>
+    <select id="service"></select>
+
+    <label for="date">Data</label>
+    <input id="date" type="date">
+
+    <div class="notice" id="slotsTitle">Dostępne godziny:</div>
+    <div id="dayInfo" class="small"></div>
+    <div id="slots" class="slots"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Twoje dane</h2>
+    <label for="name">Imię i nazwisko</label>
+    <input id="name" autocomplete="name" required>
+
+    <div class="grid">
+      <div>
+        <label for="phone">Telefon</label>
+        <input id="phone" type="tel" autocomplete="tel" required>
+      </div>
+      <div>
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="email" required>
+      </div>
+    </div>
+
+    <label for="note">Uwagi</label>
+    <textarea id="note" rows="3"></textarea>
+
+    <button id="book" disabled>Wyślij rezerwację</button>
+    <div id="msg" class="notice">Rezerwacja wymaga potwierdzenia przez właściciela.</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const C = window.TERM_CONFIG || {};
+const sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_PUBLISHABLE_KEY);
+const W = C.WORKSPACE_ID;
+const $ = id => document.getElementById(id);
+
+let services = [];
+let workHours = [];
+let daysOff = [];
+let selected = '';
+let loadingSlots = false;
+
+const pad = n => String(n).padStart(2,'0');
+
+function localISODate(d = new Date()) {
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, ch => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  }[ch]));
+}
+
+function setMessage(html, cls='') {
+  $('msg').className = 'notice' + (cls ? ' ' + cls : '');
+  $('msg').innerHTML = html;
+}
+
+function dayIndex(dateString) {
+  // JS: Sun=0..Sat=6 -> app/Supabase: Mon=0..Sun=6
+  const d = new Date(dateString + 'T12:00:00');
+  return (d.getDay() + 6) % 7;
+}
+
+function formatDatePL(dateString) {
+  if (!dateString) return '';
+  const d = new Date(dateString + 'T12:00:00');
+  return new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d);
+}
+
+function isDayOff(dateString) {
+  return daysOff.find(x => dateString >= x.od && dateString <= x.do);
+}
+
+function getHoursForDate(dateString) {
+  const dow = dayIndex(dateString);
+  return workHours.find(x => Number(x.dzien_tygodnia) === dow && x.aktywne === true);
+}
+
+async function loadServices() {
+  const {data,error} = await sb
+    .from('uslugi')
+    .select('id,nazwa,czas_trwania')
+    .eq('workspace_id', W)
+    .eq('aktywna', true)
+    .order('nazwa');
+
+  if (error) {
+    setMessage('<span class="err">Nie udało się pobrać usług: ' + esc(error.message) + '</span>','err');
+    return false;
+  }
+
+  services = data || [];
+  $('service').innerHTML = services.length
+    ? services.map(s => `<option value="${esc(s.id)}">${esc(s.nazwa)} — ${esc(s.czas_trwania)} min</option>`).join('')
+    : '<option value="">Brak dostępnych usług</option>';
+  return true;
+}
+
+async function loadRules() {
+  const [hoursResult, offResult] = await Promise.all([
+    sb.from('godziny_pracy')
+      .select('dzien_tygodnia,od,do,aktywne')
+      .eq('workspace_id', W),
+    sb.from('dni_wolne')
+      .select('od,do,opis')
+      .eq('workspace_id', W)
+      .order('od')
+  ]);
+
+  if (hoursResult.error) {
+    setMessage('<span class="err">Nie udało się pobrać godzin pracy: ' + esc(hoursResult.error.message) + '</span>','err');
+    return false;
+  }
+  if (offResult.error) {
+    setMessage('<span class="err">Nie udało się pobrać dni wolnych: ' + esc(offResult.error.message) + '</span>','err');
+    return false;
+  }
+
+  workHours = hoursResult.data || [];
+  daysOff = offResult.data || [];
+  return true;
+}
+
+function renderDayMessage() {
+  const date = $('date').value;
+  const off = isDayOff(date);
+  const hours = getHoursForDate(date);
+
+  if (off) {
+    $('dayInfo').innerHTML = `<span class="warn"><b>Ten dzień jest wolny.</b>${off.opis ? ' — ' + esc(off.opis) : ''}</span>`;
+    return 'off';
+  }
+  if (!hours) {
+    $('dayInfo').innerHTML = '<span class="warn"><b>Tego dnia nie przyjmujemy rezerwacji.</b></span>';
+    return 'closed';
+  }
+  $('dayInfo').textContent = `Godziny pracy: ${String(hours.od).slice(0,5)}–${String(hours.do).slice(0,5)}`;
+  return 'open';
+}
+
+async function slots() {
+  selected = '';
+  $('book').disabled = true;
+  const date = $('date').value;
+  const sid = $('service').value;
+  const svc = services.find(x => x.id === sid);
+
+  $('slots').innerHTML = '<div class="empty">Sprawdzam dostępne godziny…</div>';
+  if (!svc || !date) return;
+
+  const state = renderDayMessage();
+  if (state === 'off') {
+    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W wybranym dniu masz urlop / dzień wolny.</div>';
+    return;
+  }
+  if (state === 'closed') {
+    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W tym dniu nie ma ustawionych godzin pracy.</div>';
+    return;
+  }
+
+  loadingSlots = true;
+  try {
+    const {data,error} = await sb.rpc('get_available_slots', {
+      p_workspace_id: W,
+      p_date: date,
+      p_duration: svc.czas_trwania
+    });
+
+    if (error) {
+      $('slots').innerHTML = '<div class="empty"><span class="err">Nie udało się pobrać wolnych godzin: ' + esc(error.message) + '</span></div>';
+      return;
+    }
+
+    const list = data || [];
+    if (!list.length) {
+      $('slots').innerHTML = '<div class="empty"><b>Brak wolnych terminów.</b><br>Wybierz inny dzień lub usługę.</div>';
+      return;
+    }
+
+    $('slots').innerHTML = list.map(x => {
+      const t = typeof x === 'string' ? x : x.slot_time;
+      return `<button type="button" class="slot" data-time="${esc(t)}">${esc(t)}</button>`;
+    }).join('');
+
+    document.querySelectorAll('.slot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.slot').forEach(x => x.classList.remove('selected'));
+        btn.classList.add('selected');
+        selected = btn.dataset.time;
+        $('book').disabled = false;
+        setMessage('Wybrany termin: <b>' + esc(formatDatePL(date)) + ' ' + esc(selected) + '</b>. Możesz teraz wysłać rezerwację.');
+      });
+    });
+  } finally {
+    loadingSlots = false;
+  }
+}
+
+async function bookAppointment() {
+  if (loadingSlots) return;
+
+  const svc = services.find(x => x.id === $('service').value);
+  const date = $('date').value;
+  const name = $('name').value.trim();
+  const phone = $('phone').value.trim();
+  const email = $('email').value.trim();
+  const note = $('note').value.trim();
+
+  if (!svc || !selected) {
+    setMessage('<span class="err">Wybierz usługę i wolną godzinę.</span>','err');
+    return;
+  }
+  if (!name || !phone || !email) {
+    setMessage('<span class="err">Uzupełnij imię i nazwisko, telefon oraz e-mail.</span>','err');
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setMessage('<span class="err">Wpisz prawidłowy adres e-mail.</span>','err');
+    return;
+  }
+  if (isDayOff(date)) {
+    setMessage('<span class="err">Ten dzień jest wolny i nie można zarezerwować wizyty.</span>','err');
+    await slots();
+    return;
+  }
+
+  $('book').disabled = true;
+  setMessage('Wysyłam rezerwację…');
+
+  const {error} = await sb.rpc('book_appointment', {
+    p_workspace_id: W,
+    p_client_name: name,
+    p_phone: phone,
+    p_email: email,
+    p_service: svc.nazwa,
+    p_date: date,
+    p_time: selected,
+    p_duration: svc.czas_trwania,
+    p_note: note
+  });
+
+  if (error) {
+    setMessage('<span class="err">' + esc(error.message) + '</span>','err');
+    await slots();
+    return;
+  }
+
+  const bookedTime = selected;
+  setMessage(`<span class="ok"><b>Rezerwacja została wysłana.</b><br>Termin: ${esc(formatDatePL(date))} ${esc(bookedTime)}.<br>Wizyta oczekuje na potwierdzenie.</span>`,'ok');
+  $('name').value = '';
+  $('phone').value = '';
+  $('email').value = '';
+  $('note').value = '';
+  await slots();
+}
+
+$('service').addEventListener('change', slots);
+$('date').addEventListener('change', slots);
+$('book').addEventListener('click', bookAppointment);
+
+(async function init(){
+  const t = localISODate();
+  $('date').min = t;
+  $('date').value = t;
+  setMessage('Łączenie z bazą online…');
+
+  const okServices = await loadServices();
+  const okRules = await loadRules();
+  if (!okServices || !okRules) return;
+
+  await slots();
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js").catch(function(){}); });
+}
+</script>
+</body>
+</html>
