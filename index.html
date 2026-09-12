@@ -36,6 +36,19 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .small{font-size:12px;color:#75695f}
 .empty{padding:12px;border:1px solid #d8c8aa;background:#f8f3ea}
 .hidden{display:none}
+.rodo-box{margin-top:14px;padding:13px;background:#fbf7ef;border:1px solid #d8c8aa}
+.rodo-row{display:flex;align-items:flex-start;gap:9px;margin:10px 0;font-size:13px;line-height:1.45;font-weight:normal}
+.rodo-row input[type="checkbox"]{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0;accent-color:#64152d}
+.rodo-row label{display:inline;margin:0;font-weight:normal;font-size:13px}
+.rodo-link{display:inline-block;margin-top:2px;color:#64152d;text-decoration:underline;font-weight:bold;cursor:pointer}
+.modal-backdrop.hidden{display:none}
+.modal-backdrop{position:fixed;inset:0;background:rgba(30,18,22,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999}
+.modal{width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border:1px solid #bfa77e;box-shadow:0 12px 35px rgba(0,0,0,.25);padding:20px}
+.modal h2{margin-top:0;color:#64152d}
+.modal p,.modal li{font-size:14px;line-height:1.55}
+.modal-close{width:auto;min-width:120px;padding:10px 18px}
+.rodo-required{font-size:12px;color:#a51f2d;margin-top:6px}
+
 .status-title{font-weight:bold;margin-bottom:4px}
 @media(max-width:520px){
   .grid{grid-template-columns:1fr}
@@ -84,6 +97,47 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <label for="note">Uwagi</label>
     <textarea id="note" rows="3"></textarea>
 
+
+    <div class="rodo-box">
+      <div class="status-title">🔒 Twoje dane</div>
+
+      <div class="rodo-row">
+        <input id="rodo" type="checkbox" required>
+        <div>
+          <label for="rodo">Zapoznałam/em się z informacją o przetwarzaniu danych osobowych. <b>*</b></label>
+          <br>
+          <span id="openRodo" class="rodo-link">Przeczytaj informację RODO</span>
+        </div>
+      </div>
+
+      <div class="rodo-row">
+        <input id="marketing" type="checkbox">
+        <div>
+          <label for="marketing">Chcę otrzymywać informacje o usługach i dostępnych terminach drogą e-mail lub SMS.</label>
+        </div>
+      </div>
+
+      <div class="small">* Potwierdzenie zapoznania się z informacją jest wymagane do wysłania rezerwacji.</div>
+    </div>
+
+    <div id="rodoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rodoTitle">
+      <div class="modal">
+        <h2 id="rodoTitle">Informacja o przetwarzaniu danych osobowych</h2>
+        <p><b>Administratorem danych osobowych jest Anita Wrzesińska, ul. Kazimierza Leskiego 24/1, 80-180 Gdańsk.</b></p>
+
+        <p>Dane podane w formularzu „Umów wizytę”, w szczególności imię i nazwisko, numer telefonu, adres e-mail oraz informacje przekazane w polu „Uwagi”, są przetwarzane w celu obsługi rezerwacji wizyty, kontaktu w sprawie rezerwacji oraz organizacji umówionej wizyty.</p>
+
+        <p>Podanie danych oznaczonych jako wymagane jest niezbędne do obsługi rezerwacji. Dane niezbędne do realizacji rezerwacji nie są przetwarzane na podstawie dobrowolnej zgody, jeżeli podstawą ich przetwarzania jest zawarcie lub wykonanie umowy albo inna właściwa podstawa prawna.</p>
+
+        <p>Masz prawo, w przypadkach przewidzianych przez RODO, do dostępu do swoich danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia danych oraz wniesienia sprzeciwu. Przysługuje Ci również prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych.</p>
+
+        <p>Jeżeli wyrazisz dobrowolną zgodę marketingową, możesz ją wycofać w dowolnym momencie. Wycofanie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej wycofaniem.</p>
+
+        <p><b>Wersja informacji:</b> 1.0</p>
+        <button type="button" id="closeRodo" class="modal-close">Zamknij</button>
+      </div>
+    </div>
+
     <button id="book" disabled>Wyślij rezerwację</button>
     <div id="msg" class="notice">Rezerwacja wymaga potwierdzenia przez właściciela.</div>
   </div>
@@ -102,6 +156,8 @@ let workHours = [];
 let daysOff = [];
 let selected = '';
 let loadingSlots = false;
+const RODO_VERSION = '1.0';
+const RODO_ADMIN = 'Anita Wrzesińska, ul. Kazimierza Leskiego 24/1, 80-180 Gdańsk';
 
 const pad = n => String(n).padStart(2,'0');
 
@@ -252,7 +308,7 @@ async function slots() {
         document.querySelectorAll('.slot').forEach(x => x.classList.remove('selected'));
         btn.classList.add('selected');
         selected = btn.dataset.time;
-        $('book').disabled = false;
+        updateBookState();
         setMessage('Wybrany termin: <b>' + esc(formatDatePL(date)) + ' ' + esc(selected) + '</b>. Możesz teraz wysłać rezerwację.');
       });
     });
@@ -260,6 +316,13 @@ async function slots() {
     loadingSlots = false;
   }
 }
+
+
+function updateBookState() {
+  $('book').disabled = !(selected && $('rodo').checked);
+}
+
+
 
 async function bookAppointment() {
   if (loadingSlots) return;
@@ -270,6 +333,11 @@ async function bookAppointment() {
   const phone = $('phone').value.trim();
   const email = $('email').value.trim();
   const note = $('note').value.trim();
+
+  if (!$('rodo').checked) {
+    setMessage('<span class="err">Aby wysłać rezerwację, zapoznaj się z informacją RODO i zaznacz wymagane pole.</span>','err');
+    return;
+  }
 
   if (!svc || !selected) {
     setMessage('<span class="err">Wybierz usługę i wolną godzinę.</span>','err');
@@ -292,7 +360,7 @@ async function bookAppointment() {
   $('book').disabled = true;
   setMessage('Wysyłam rezerwację…');
 
-  const {error} = await sb.rpc('book_appointment', {
+  const {data: rezerwacjaId, error} = await sb.rpc('book_appointment', {
     p_workspace_id: W,
     p_client_name: name,
     p_phone: phone,
@@ -310,12 +378,34 @@ async function bookAppointment() {
     return;
   }
 
+  if (!rezerwacjaId) {
+    setMessage('<span class="err">Rezerwacja została utworzona, ale baza nie zwróciła jej identyfikatora. Zgoda RODO nie została zapisana.</span>','err');
+    await slots();
+    return;
+  }
+
+  const {error: rodoError} = await sb.rpc('zapisz_zgode_rodo', {
+    p_rezerwacja_id: rezerwacjaId,
+    p_workspace_id: W,
+    p_rodo_wersja: RODO_VERSION,
+    p_marketing_zgoda: $('marketing').checked
+  });
+
+  if (rodoError) {
+    setMessage('<span class="err">Rezerwacja została utworzona, ale nie udało się zapisać zgody RODO: ' + esc(rodoError.message) + '</span>','err');
+    await slots();
+    return;
+  }
+
   const bookedTime = selected;
   setMessage(`<span class="ok"><b>Rezerwacja została wysłana.</b><br>Termin: ${esc(formatDatePL(date))} ${esc(bookedTime)}.<br>Wizyta oczekuje na potwierdzenie.</span>`,'ok');
   $('name').value = '';
   $('phone').value = '';
   $('email').value = '';
   $('note').value = '';
+  $('rodo').checked = false;
+  $('marketing').checked = false;
+  updateBookState();
   await slots();
 }
 
@@ -323,10 +413,31 @@ $('service').addEventListener('change', slots);
 $('date').addEventListener('change', slots);
 $('book').addEventListener('click', bookAppointment);
 
+
+$('rodo').addEventListener('change', updateBookState);
+$('marketing').addEventListener('change', updateBookState);
+
+$('openRodo').addEventListener('click', () => {
+  $('rodoModal').classList.remove('hidden');
+});
+
+$('closeRodo').addEventListener('click', () => {
+  $('rodoModal').classList.add('hidden');
+});
+
+$('rodoModal').addEventListener('click', e => {
+  if (e.target === $('rodoModal')) $('rodoModal').classList.add('hidden');
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') $('rodoModal').classList.add('hidden');
+});
+
 (async function init(){
   const t = localISODate();
   $('date').min = t;
   $('date').value = t;
+  updateBookState();
   setMessage('Łączenie z bazą online…');
 
   const okServices = await loadServices();
