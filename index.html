@@ -67,8 +67,21 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 <div class="wrap">
   <div class="card">
-    <label for="service">Usługa</label>
-    <select id="service"></select>
+    <label for="service">Rodzaj wizyty</label>
+    <select id="service" required>
+      <option value="">— wybierz rodzaj wizyty —</option>
+      <option value="masaż ciała">masaż ciała</option>
+      <option value="masaż twarzy">masaż twarzy</option>
+      <option value="masaż gorącymi kamieniami">masaż gorącymi kamieniami</option>
+      <option value="masaż maseczka/maskalat">masaż maseczka/maskalat</option>
+    </select>
+    <label for="duration">Czas planowanej wizyty</label>
+    <select id="duration" required>
+      <option value="">— wybierz czas —</option>
+      <option value="30">30 min</option>
+      <option value="60">60 min</option>
+      <option value="90">90 min</option>
+    </select>
 
     <label for="date">Data</label>
     <input id="date" type="date">
@@ -182,6 +195,26 @@ function dayIndex(dateString) {
   return (d.getDay() + 6) % 7;
 }
 
+
+function normalizeSlotTime(value) {
+  const m = String(value ?? '').match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return '';
+  return String(Number(m[1])).padStart(2,'0') + ':' + m[2];
+}
+
+function timeToMinutes(value) {
+  const m = normalizeSlotTime(value).match(/^(\d{2}):(\d{2})$/);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
+}
+
+function isPastSlot(dateString, timeString) {
+  if (dateString !== localISODate()) return false;
+  const mins = timeToMinutes(timeString);
+  if (!Number.isFinite(mins)) return false;
+  const now = new Date();
+  return mins <= now.getHours() * 60 + now.getMinutes();
+}
+
 function formatDatePL(dateString) {
   if (!dateString) return '';
   const d = new Date(dateString + 'T12:00:00');
@@ -211,9 +244,13 @@ async function loadServices() {
   }
 
   services = data || [];
-  $('service').innerHTML = services.length
-    ? services.map(s => `<option value="${esc(s.id)}">${esc(s.nazwa)} — ${esc(s.czas_trwania)} min</option>`).join('')
-    : '<option value="">Brak dostępnych usług</option>';
+  $('service').innerHTML =
+    '<option value="">— wybierz rodzaj wizyty —</option>' +
+    '<option value="masaż ciała">masaż ciała</option>' +
+    '<option value="masaż twarzy">masaż twarzy</option>' +
+    '<option value="masaż gorącymi kamieniami">masaż gorącymi kamieniami</option>' +
+    '<option value="masaż maseczka/maskalat">masaż maseczka/maskalat</option>';
+
   return true;
 }
 
@@ -263,11 +300,12 @@ async function slots() {
   selected = '';
   $('book').disabled = true;
   const date = $('date').value;
-  const sid = $('service').value;
-  const svc = services.find(x => x.id === sid);
+  const serviceName = $('service').value;
+  const svc = services.find(x => x.nazwa === serviceName) || {nazwa: serviceName};
+  const duration = Number($('duration').value || 0);
 
   $('slots').innerHTML = '<div class="empty">Sprawdzam dostępne godziny…</div>';
-  if (!svc || !date) return;
+  if (!svc.nazwa || !date || !duration) return;
 
   const state = renderDayMessage();
   if (state === 'off') {
@@ -284,7 +322,7 @@ async function slots() {
     const {data,error} = await sb.rpc('get_available_slots', {
       p_workspace_id: W,
       p_date: date,
-      p_duration: svc.czas_trwania
+      p_duration: duration
     });
 
     if (error) {
@@ -292,7 +330,12 @@ async function slots() {
       return;
     }
 
-    const list = data || [];
+    let list = (data || [])
+      .map(x => typeof x === 'string' ? x : x && x.slot_time)
+      .map(normalizeSlotTime)
+      .filter(Boolean)
+      .filter(t => !isPastSlot(date, t));
+
     if (!list.length) {
       $('slots').innerHTML = '<div class="empty"><b>Brak wolnych terminów.</b><br>Wybierz inny dzień lub usługę.</div>';
       return;
@@ -327,20 +370,26 @@ function updateBookState() {
 async function bookAppointment() {
   if (loadingSlots) return;
 
-  const svc = services.find(x => x.id === $('service').value);
+  const serviceName = $('service').value;
+  const svc = services.find(x => x.nazwa === serviceName) || {nazwa: serviceName};
   const date = $('date').value;
   const name = $('name').value.trim();
   const phone = $('phone').value.trim();
   const email = $('email').value.trim();
   const note = $('note').value.trim();
+  const duration = Number($('duration').value || 0);
 
   if (!$('rodo').checked) {
     setMessage('<span class="err">Aby wysłać rezerwację, zapoznaj się z informacją RODO i zaznacz wymagane pole.</span>','err');
     return;
   }
 
-  if (!svc || !selected) {
-    setMessage('<span class="err">Wybierz usługę i wolną godzinę.</span>','err');
+  if (!svc.nazwa || !selected || !duration) {
+    setMessage('<span class="err">Wybierz rodzaj wizyty, czas trwania i wolną godzinę.</span>','err');
+    return;
+  }
+  if (![30,60,90].includes(duration)) {
+    setMessage('<span class="err">Czas wizyty musi wynosić 30, 60 lub 90 min.</span>','err');
     return;
   }
   if (!name || !phone || !email) {
@@ -368,7 +417,7 @@ async function bookAppointment() {
     p_service: svc.nazwa,
     p_date: date,
     p_time: selected,
-    p_duration: svc.czas_trwania,
+    p_duration: duration,
     p_note: note
   });
 
@@ -405,12 +454,21 @@ async function bookAppointment() {
   $('note').value = '';
   $('rodo').checked = false;
   $('marketing').checked = false;
+  $('duration').value = '';
   updateBookState();
   await slots();
 }
 
-$('service').addEventListener('change', slots);
+$('service').addEventListener('change', () => {
+  const serviceName = $('service').value;
+  const svc = services.find(x => x.nazwa === serviceName);
+  if (svc && svc.czas_trwania != null) {
+    $('duration').value = String(svc.czas_trwania);
+  }
+  slots();
+});
 $('date').addEventListener('change', slots);
+$('duration').addEventListener('change', slots);
 $('book').addEventListener('click', bookAppointment);
 
 
@@ -442,6 +500,10 @@ document.addEventListener('keydown', e => {
 
   const okServices = await loadServices();
   const okRules = await loadRules();
+   if (okServices && services.length) {
+    const firstService = services[0];
+    if (firstService.czas_trwania != null) $('duration').value = String(firstService.czas_trwania);
+  }
   if (!okServices || !okRules) return;
 
   await slots();
