@@ -50,6 +50,13 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .rodo-required{font-size:12px;color:#a51f2d;margin-top:6px}
 
 .status-title{font-weight:bold;margin-bottom:4px}
+.client-settings{margin:13px 0}
+.client-settings h2{margin:0 0 8px;color:#64152d;font-size:19px}
+.client-settings .client-owner{font-weight:bold;margin-bottom:7px}
+.client-settings .client-contact{line-height:1.55}
+.client-settings .client-info{margin-top:10px;padding:10px;background:#efe4d0;line-height:1.5}
+.client-settings a{color:#64152d;font-weight:bold}
+
 @media(max-width:520px){
   .grid{grid-template-columns:1fr}
   .slots{grid-template-columns:repeat(2,1fr)}
@@ -65,14 +72,12 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 
 
-
-
-<div style="display: flex; justify-content: center; align-items: center; min-height: 15vh; margin: 0; box-sizing: border-box;">
+<div style="display: flex; justify-content: center; width: 100%;">
   <div style="display: flex; align-items: center; gap: 1rem;">
-    <img src="./aj_logo.png" style="height: 7rem;">
+    <img src="./aj_logo.png" style="height: 4.5rem;">
     <div>
-      <h1 style="margin: 0; font-size: 2rem;">Umów wizytę</h1>
-      <div style="color: #555;">Wybierz usługę, dzień i wolną godzinę</div>
+      <h3 id="calendarName" style="margin: 0; font-size: 2rem;">Umów wizytę</h3>
+      <div id="ownerName">Wybierz usługę, dzień i wolną godzinę</div>
     </div>
   </div>
 </div>
@@ -90,9 +95,35 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 
 
+
+
+</header>
+
+
+>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </header>
 
 <div class="wrap">
+  <div id="clientSettings" class="card client-settings hidden">
+    <h2 id="clientSettingsTitle">Informacje o gabinecie</h2>
+    <div id="clientOwner" class="client-owner"></div>
+    <div id="clientContact" class="client-contact"></div>
+    <div id="clientInfo" class="client-info hidden"></div>
+  </div>
   <div class="card">
     <label for="service">Rodzaj wizyty</label>
     <select id="service" required>
@@ -295,6 +326,54 @@ function getHoursForDate(dateString) {
   return workHours.find(x => Number(x.dzien_tygodnia) === dow && x.aktywne === true);
 }
 
+async function loadClientSettings() {
+  const r = await sb
+    .from('ustawienia')
+    .select('nazwa_terminarza,nazwa_osoby,telefon,email,informacja_dla_klienta')
+    .eq('workspace_id', W)
+    .maybeSingle();
+
+  if (r.error) {
+    console.warn('Nie udało się pobrać ustawień dla klienta:', r.error.message);
+    return false;
+  }
+
+  const x = r.data || {};
+  const calendarName = String(x.nazwa_terminarza || '').trim();
+  const owner = String(x.nazwa_osoby || '').trim();
+  const phone = String(x.telefon || '').trim();
+  const email = String(x.email || '').trim();
+  const info = String(x.informacja_dla_klienta || '').trim();
+
+  if (calendarName) {
+    $('calendarName').textContent = calendarName;
+    $('clientSettingsTitle').textContent = calendarName;
+  }
+
+  if (owner) {
+    $('ownerName').textContent = owner;
+    $('clientOwner').textContent = owner;
+  } else {
+    $('ownerName').textContent = 'Wybierz usługę, dzień i wolną godzinę';
+  }
+
+  const contacts = [];
+  if (phone) {
+    const tel = phone.replace(/[^\d+]/g,'');
+    contacts.push('<div>Telefon: <a href="tel:' + esc(tel) + '">' + esc(phone) + '</a></div>');
+  }
+  if (email) {
+    contacts.push('<div>E-mail: <a href="mailto:' + encodeURIComponent(email) + '">' + esc(email) + '</a></div>');
+  }
+
+  $('clientContact').innerHTML = contacts.join('');
+  $('clientInfo').textContent = info;
+  $('clientInfo').classList.toggle('hidden', !info);
+
+  $('clientSettings').classList.toggle('hidden', !(owner || contacts.length || info));
+  return true;
+}
+
 async function loadServices() {
   const {data,error} = await sb
     .from('uslugi')
@@ -304,17 +383,26 @@ async function loadServices() {
     .order('nazwa');
 
   if (error) {
+    services = [];
     setMessage('<span class="err">Nie udało się pobrać usług: ' + esc(error.message) + '</span>','err');
     return false;
   }
 
   services = data || [];
+
+  // Nazwy widoczne dla klienta.
+  const wanted = [
+    'masaż ciała',
+    'masaż twarzy',
+    'masaż gorącymi kamieniami',
+    'masaż maseczka/maskalat'
+  ];
+
   $('service').innerHTML =
     '<option value="">— wybierz rodzaj wizyty —</option>' +
-    '<option value="masaż ciała">masaż ciała</option>' +
-    '<option value="masaż twarzy">masaż twarzy</option>' +
-    '<option value="masaż gorącymi kamieniami">masaż gorącymi kamieniami</option>' +
-    '<option value="masaż maseczka/maskalat">masaż maseczka/maskalat</option>';
+    wanted.map(name =>
+      '<option value="' + esc(name) + '">' + esc(name) + '</option>'
+    ).join('');
 
   return true;
 }
@@ -361,16 +449,20 @@ function renderDayMessage() {
   return 'open';
 }
 
+function getDbServiceForDuration(duration) {
+  const minutes = Number(duration);
+  return services.find(s => Number(s.czas_trwania) === minutes) || null;
+}
+
 async function slots() {
   selected = '';
   $('book').disabled = true;
   const date = $('date').value;
   const serviceName = $('service').value;
-  const svc = services.find(x => x.nazwa === serviceName) || {nazwa: serviceName};
   const duration = Number($('duration').value || 0);
 
   $('slots').innerHTML = '<div class="empty">Sprawdzam dostępne godziny…</div>';
-  if (!svc.nazwa || !date || !duration) return;
+  if (!serviceName || !date || !duration) return;
 
   const state = renderDayMessage();
   if (state === 'off') {
@@ -436,7 +528,6 @@ async function bookAppointment() {
   if (loadingSlots) return;
 
   const serviceName = $('service').value;
-  const svc = services.find(x => x.nazwa === serviceName) || {nazwa: serviceName};
   const date = $('date').value;
   const name = $('name').value.trim();
   const phone = $('phone').value.trim();
@@ -449,8 +540,14 @@ async function bookAppointment() {
     return;
   }
 
-  if (!svc.nazwa || !selected || !duration) {
+  if (!serviceName || !selected || !duration) {
     setMessage('<span class="err">Wybierz rodzaj wizyty, czas trwania i wolną godzinę.</span>','err');
+    return;
+  }
+
+  const dbService = getDbServiceForDuration(duration);
+  if (!dbService) {
+    setMessage('<span class="err">Dla wybranego czasu wizyty nie ma aktywnej usługi w bazie. Ustaw usługę 30, 60 lub 90 min w zakładce „Usługi” Admina.</span>','err');
     return;
   }
   if (![30,60,90].includes(duration)) {
@@ -479,11 +576,11 @@ async function bookAppointment() {
     p_client_name: name,
     p_phone: phone,
     p_email: email,
-    p_service: svc.nazwa,
+    p_service: dbService.nazwa,
     p_date: date,
     p_time: selected,
     p_duration: duration,
-    p_note: note
+    p_note: 'Rodzaj wizyty: ' + serviceName + (note ? '\n' + note : '')
   });
 
   if (error) {
@@ -525,11 +622,6 @@ async function bookAppointment() {
 }
 
 $('service').addEventListener('change', () => {
-  const serviceName = $('service').value;
-  const svc = services.find(x => x.nazwa === serviceName);
-  if (svc && svc.czas_trwania != null) {
-    $('duration').value = String(svc.czas_trwania);
-  }
   slots();
 });
 $('date').addEventListener('change', slots);
@@ -563,12 +655,9 @@ document.addEventListener('keydown', e => {
   updateBookState();
   setMessage('Łączenie z bazą online…');
 
+  const okSettings = await loadClientSettings();
   const okServices = await loadServices();
   const okRules = await loadRules();
-   if (okServices && services.length) {
-    const firstService = services[0];
-    if (firstService.czas_trwania != null) $('duration').value = String(firstService.czas_trwania);
-  }
   if (!okServices || !okRules) return;
 
   await slots();
