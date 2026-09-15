@@ -1,2106 +1,702 @@
 <!doctype html>
-<html lang="pl"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#64152d"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>Terminarz wizyt – panel</title>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#64152d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Umów wizytę</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-window.TERM_CONFIG={
-  SUPABASE_URL:"https://oiabhlviecdkstuedmdp.supabase.co",
-  SUPABASE_PUBLISHABLE_KEY:"sb_publishable_IoteuBlBG9exrD5ubm-z4A_9szDC9Md",
-  WORKSPACE_ID:"11111111-1111-1111-1111-111111111111"
-};
-</script>
+<script>window.TERM_CONFIG={SUPABASE_URL:"https://oiabhlviecdkstuedmdp.supabase.co",SUPABASE_PUBLISHABLE_KEY:"sb_publishable_IoteuBlBG9exrD5ubm-z4A_9szDC9Md",WORKSPACE_ID:"11111111-1111-1111-1111-111111111111"};</script>
 <style>
-:root{--b:#64152d;--bd:#3d0b1c;--g:#d7ad55;--bg:#f6f0e5;--card:#fffdf8;--ink:#24151a;--line:#d8c8aa;--muted:#74695d;--ok:#315b2c;--okbg:#edf5e8;--bad:#7a2424;--badbg:#f8e7e7;--pend:#765b36;--pendbg:#fff4cf}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}body{padding-top:64px}.top{position:fixed;z-index:30;top:0;left:0;right:0;height:64px;background:linear-gradient(90deg,var(--bd),var(--b));color:#fff;display:flex;align-items:center;padding:0 12px;box-shadow:0 2px 10px #0003}.top h1{font-size:18px;margin:0}.top .spacer{flex:1}.top button{margin-left:8px}
-button,input,select,textarea{font:inherit}button{border:1px solid var(--g);background:linear-gradient(#8b2443,var(--b));color:#fff;padding:10px 13px;font-weight:bold;border-radius:0;min-height:42px;cursor:pointer}button.secondary{background:#fff;color:var(--b);border-color:var(--line)}button.danger{background:#7a2424;border-color:#b87979}button.smallBtn{min-height:36px;padding:7px 10px;font-size:12px}button:disabled{opacity:.55;cursor:not-allowed}input,select,textarea{width:100%;padding:10px;border:1px solid #bfae8f;background:#fff;border-radius:0;color:var(--ink)}textarea{min-height:70px;resize:vertical}label{display:block;font-size:13px;font-weight:bold;margin:9px 0 4px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions>*{flex:1}.wrap{max-width:1200px;margin:auto;padding:10px}.hidden{display:none!important}.notice{font-size:12px;padding:9px 10px;border:1px solid var(--g);background:var(--pendbg);color:var(--b);margin-bottom:12px}.notice.err{border-color:#d5a0a0;background:var(--badbg);color:var(--bad)}
-.tabs{display:none}.tab{white-space:nowrap;background:#eee5d5;color:var(--b);border:1px solid var(--line);border-bottom:0}.tab.active{background:var(--b);color:#fff}.panel{display:none}.panel.active{display:block}.grid2{display:grid;grid-template-columns:330px 1fr;gap:12px}.card{background:var(--card);border:1px solid var(--line);padding:14px;box-shadow:0 2px 8px #0001}.card h2{margin:0 0 12px;color:var(--b);font-size:18px}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:8px}.muted{color:var(--muted);font-size:12px}.count{font-size:12px;color:var(--pend);font-weight:bold}.tableWrap{overflow:auto}.table{width:100%;border-collapse:collapse;background:#fff}.table th,.table td{border-bottom:1px solid #e4dac7;padding:9px;text-align:left;vertical-align:top;font-size:13px}.table th{color:var(--b);background:#f3eee5}.statusBadge{display:inline-block;padding:4px 8px;border:1px solid var(--line);font-size:11px;font-weight:bold}.statusBadge.pending{background:var(--pendbg);color:var(--pend);border-color:var(--g)}.statusBadge.confirmed{background:var(--okbg);color:var(--ok);border-color:#9fbd8e}.statusBadge.rejected{background:var(--badbg);color:var(--bad);border-color:#d5a0a0}
-.monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.monthbar strong{text-transform:capitalize;color:var(--b);font-size:18px}.monthbar button{width:45px}.week{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}.dow{text-align:center;font-size:11px;font-weight:bold;color:#765b36;padding:4px}.day{min-height:96px;background:#fff;border:1px solid var(--line);padding:5px;cursor:pointer}.day.muted{background:#f3eee5;color:#aaa}.day.today{outline:2px solid var(--g);outline-offset:-2px}.day.sel{background:#fff2c8}.num{font-weight:bold;font-size:12px}.appt{font-size:10px;margin-top:4px;padding:3px 4px;color:#fff;border-left:3px solid var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.appt.pending{background:#8a683b}.appt.confirmed{background:#3d6b36}.appt.rejected{background:#7a2424}.dayOff{background:#f8e7e7!important;border-color:#d5a0a0!important}.dayOff .num{color:var(--bad)}
-.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.serviceRow,.offRow,.hourRow{display:grid;grid-template-columns:1.5fr .7fr .7fr auto;gap:8px;align-items:end;border-bottom:1px solid #e4dac7;padding:10px 0}.hourRow{grid-template-columns:1.2fr .8fr .8fr .7fr}.offRow{grid-template-columns:1fr 1fr 1.5fr auto}.toggle{display:flex;align-items:center;gap:6px;font-size:13px}.toggle input{width:auto}.empty{text-align:center;padding:22px;color:#887d70}.availableTimesWrap{margin-top:10px}.slotPicker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;min-height:42px}.slotPicker button{margin:0;min-height:42px;background:#fff;color:var(--b);border-color:var(--line)}.slotPicker button.selected{background:var(--b);color:#fff;border-color:var(--b)}.slotPicker .empty{grid-column:1/-1;border:1px solid var(--line);background:#f8f3ea;padding:12px;font-size:12px}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px}.dot{display:inline-block;width:10px;height:10px;border:1px solid #777;margin-right:4px;vertical-align:middle}.dot.pending{background:#8a683b}.dot.confirmed{background:#3d6b36}.dot.rejected{background:#7a2424}.dot.off{background:#f8e7e7;border-color:#d5a0a0}
-#login{max-width:420px;margin:70px auto}.settingsGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.help{font-size:12px;color:var(--muted);margin-top:5px}
-@media(max-width:900px){.grid2{grid-template-columns:1fr}.filters{grid-template-columns:1fr 1fr}.serviceRow,.hourRow,.offRow{grid-template-columns:1fr 1fr}.serviceRow .actions,.hourRow .actions,.offRow .actions{grid-column:1/-1}}
-@media(max-width:560px){.slotPicker{grid-template-columns:repeat(2,minmax(0,1fr))}body{padding-top:58px}.top{height:58px}.top h1{font-size:15px}.wrap{padding:7px}.row,.settingsGrid,.filters{grid-template-columns:1fr}.day{min-height:68px}.appt{display:none}.day.has:after{content:"•";display:block;color:var(--b);font-size:22px}.table th,.table td{font-size:12px;padding:7px}.tabs{margin-left:-7px;margin-right:-7px;padding-left:7px}}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;font-family:Arial,sans-serif;background:#f7f1e8;color:#3a2430}
+body{padding-bottom:25px}
+header{background:#64152d;color:#f2d18b;text-align:center;padding:22px 14px}
+h1{margin:0;font-size:25px}
+header div{margin-top:6px;font-size:16px}
+.wrap{max-width:680px;margin:auto;padding:14px}
+.card{background:#fff;border:1px solid #d8c8aa;padding:16px;margin:13px 0}
+label{display:block;font-weight:bold;font-size:13px;margin:9px 0 5px}
+input,select,textarea,button{width:100%;padding:11px;border:1px solid #bfa77e;border-radius:0;font:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:2px solid #e2c77f;outline-offset:1px}
+button{background:#64152d;color:#f2d18b;font-weight:bold;margin-top:11px;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{margin:0;background:#fff;color:#64152d;min-height:43px}
+.slot.selected{background:#64152d;color:#f2d18b}
+.notice{padding:10px;background:#efe4d0;margin:10px 0}
+.ok{color:#216b3a}
+.err{color:#a51f2d}
+.warn{color:#7a4a00}
+.small{font-size:12px;color:#75695f}
+.empty{padding:12px;border:1px solid #d8c8aa;background:#f8f3ea}
+.hidden{display:none}
+.rodo-box{margin-top:14px;padding:13px;background:#fbf7ef;border:1px solid #d8c8aa}
+.rodo-row{display:flex;align-items:flex-start;gap:9px;margin:10px 0;font-size:13px;line-height:1.45;font-weight:normal}
+.rodo-row input[type="checkbox"]{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0;accent-color:#64152d}
+.rodo-row label{display:inline;margin:0;font-weight:normal;font-size:13px}
+.rodo-link{display:inline-block;margin-top:2px;color:#64152d;text-decoration:underline;font-weight:bold;cursor:pointer}
+.modal-backdrop.hidden{display:none}
+.modal-backdrop{position:fixed;inset:0;background:rgba(30,18,22,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999}
+.modal{width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border:1px solid #bfa77e;box-shadow:0 12px 35px rgba(0,0,0,.25);padding:20px}
+.modal h2{margin-top:0;color:#64152d}
+.modal p,.modal li{font-size:14px;line-height:1.55}
+.modal-close{width:auto;min-width:120px;padding:10px 18px}
+.rodo-required{font-size:12px;color:#a51f2d;margin-top:6px}
 
+.status-title{font-weight:bold;margin-bottom:4px}
+.client-settings{margin:13px 0}
+.client-settings h2{margin:0 0 8px;color:#64152d;font-size:19px}
+.client-settings .client-owner{font-weight:bold;margin-bottom:7px}
+.client-settings .client-contact{line-height:1.55}
+.client-settings .client-info{margin-top:10px;padding:10px;background:#efe4d0;line-height:1.5}
+.client-settings a{color:#64152d;font-weight:bold}
 
-
-/* =========================================================
-   MENU MASTER — PC / TABLET / ANDROID / iOS
-   Jedna spójna konstrukcja. Bez zmian w logice bazy/logowania.
-   ========================================================= */
-:root{
-  --menu-w:250px;
-  --top-h:68px;
-  --wine:#64152d;
-  --wine-dark:#3d0b1c;
-  --wine-light:#7b1d39;
-  --gold:#d7ad55;
+@media(max-width:520px){
+  .grid{grid-template-columns:1fr}
+  .slots{grid-template-columns:repeat(2,1fr)}
+  h1{font-size:23px}
+  .wrap{padding:10px}
+  .card{padding:13px}
 }
-
-/* wspólne */
-html,body{
-  min-height:100%;
-  width:100%;
-  margin:0;
-  overflow-x:hidden;
-  -webkit-text-size-adjust:100%;
-  text-size-adjust:100%;
-}
-body{
-  padding-top:var(--top-h);
-  padding-left:var(--menu-w);
-  background:var(--bg);
-}
-
-/* GÓRNE MENU — zawsze przyklejone */
-.top{
-  position:fixed !important;
-  z-index:4000 !important;
-  top:0 !important;
-  left:var(--menu-w) !important;
-  right:0 !important;
-  width:auto !important;
-  height:var(--top-h) !important;
-  min-height:var(--top-h) !important;
-  display:flex !important;
-  align-items:center !important;
-  box-sizing:border-box !important;
-  padding:0 18px !important;
-  background:linear-gradient(90deg,var(--wine-dark),var(--wine)) !important;
-  color:#fff !important;
-  border:0 !important;
-  border-bottom:3px solid var(--gold) !important;
-  border-radius:0 !important;
-  box-shadow:0 3px 12px #0003 !important;
-  -webkit-transform:translateZ(0);
-  transform:translateZ(0);
-}
-
-/* BOCZNE MENU — na komputerze stale widoczne */
-.sideNav{
-  position:fixed !important;
-  z-index:4100 !important;
-  top:0 !important;
-  left:0 !important;
-  bottom:0 !important;
-  width:var(--menu-w) !important;
-  height:100vh !important;
-  height:100dvh !important;
-  box-sizing:border-box !important;
-  margin:0 !important;
-  padding:18px 12px !important;
-  padding-top:max(18px,env(safe-area-inset-top)) !important;
-  padding-bottom:max(18px,env(safe-area-inset-bottom)) !important;
-  overflow-x:hidden !important;
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch !important;
-  background:linear-gradient(180deg,var(--wine-dark),var(--wine)) !important;
-  border:0 !important;
-  border-right:3px solid var(--gold) !important;
-  border-radius:0 !important;
-  box-shadow:3px 0 12px #0002 !important;
-}
-
-/* Logo */
-.sideLogo{
-  min-height:68px !important;
-  margin:0 2px 18px !important;
-  padding:3px 2px 15px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:10px !important;
-  border-bottom:1px solid #d7ad5580 !important;
-}
-.sideTitle{
-  margin:0 2px 8px !important;
-  padding:0 3px 6px !important;
-  color:#ead8a9 !important;
-  letter-spacing:2px !important;
-  font-size:11px !important;
-}
-
-/* Pozycje menu */
-.sideItem{
-  width:100% !important;
-  min-height:48px !important;
-  margin:4px 0 !important;
-  padding:11px 12px !important;
-  display:flex !important;
-  align-items:center !important;
-  gap:11px !important;
-  box-sizing:border-box !important;
-  border:1px solid transparent !important;
-  border-left:3px solid transparent !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  color:#fff !important;
-  text-align:left !important;
-  font-weight:bold !important;
-  touch-action:manipulation !important;
-  -webkit-user-select:none;
-  user-select:none;
-}
-.sideItem:hover{
-  background:#ffffff12 !important;
-  border-color:#d7ad5560 !important;
-}
-.sideItem:active{
-  transform:translateY(1px);
-}
-.sideItem.active{
-  background:linear-gradient(90deg,var(--wine-light),#70203a) !important;
-  border-color:#d7ad55 !important;
-  border-left-color:var(--gold) !important;
-  box-shadow:inset 4px 0 0 var(--gold) !important;
-}
-
-/* Hamburger */
-.menuToggle{
-  display:flex !important;
-  flex:0 0 46px !important;
-  width:46px !important;
-  height:46px !important;
-  min-width:46px !important;
-  min-height:46px !important;
-  align-items:center !important;
-  justify-content:center !important;
-  flex-direction:column !important;
-  gap:6px !important;
-  margin:0 !important;
-  padding:5px !important;
-  border:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  touch-action:manipulation !important;
-}
-.menuToggle span{
-  display:block !important;
-  width:24px !important;
-  height:2px !important;
-  background:#fff !important;
-  transition:transform .2s ease,opacity .2s ease !important;
-}
-body.menuOpen .menuToggle span:nth-child(1){
-  transform:translateY(8px) rotate(45deg);
-}
-body.menuOpen .menuToggle span:nth-child(2){opacity:0}
-body.menuOpen .menuToggle span:nth-child(3){
-  transform:translateY(-8px) rotate(-45deg);
-}
-
-/* brak przesłony */
-#navShade,.navShade,.navShade.show{
-  display:none !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-}
-
-/* komputer */
-@media (min-width:901px){
-  .sideNav{transform:none !important;}
-  .top{transform:none !important;}
-  #login,#app{transform:none !important;}
-}
-
-/* tablet + telefon: boczne menu wysuwane, ale nadal przyklejone do ekranu */
-@media (max-width:900px){
-  body{
-    padding-left:0 !important;
-    padding-top:64px !important;
-  }
-  .top{
-    left:0 !important;
-    right:0 !important;
-    width:100% !important;
-    height:calc(64px + env(safe-area-inset-top)) !important;
-    min-height:calc(64px + env(safe-area-inset-top)) !important;
-    padding-top:env(safe-area-inset-top) !important;
-    padding-left:max(10px,env(safe-area-inset-left)) !important;
-    padding-right:max(10px,env(safe-area-inset-right)) !important;
-  }
-  .sideNav{
-    top:0 !important;
-    width:min(300px,84vw) !important;
-    height:100vh !important;
-    height:100dvh !important;
-    padding-top:calc(14px + env(safe-area-inset-top)) !important;
-    transform:translate3d(-101%,0,0) !important;
-    transition:transform .23s ease !important;
-    will-change:transform;
-  }
-  .sideNav.open{
-    transform:translate3d(0,0,0) !important;
-  }
-  body .top,
-  body #login,
-  body #app{
-    transition:transform .23s ease !important;
-    will-change:transform;
-  }
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{
-    transform:translate3d(min(300px,84vw),0,0) !important;
-  }
-  #login,#app{
-    width:100% !important;
-    max-width:100% !important;
-  }
-}
-
-/* mały ekran Android/iOS */
-@media (max-width:560px){
-  body{
-    padding-top:calc(58px + env(safe-area-inset-top)) !important;
-  }
-  .top{
-    height:calc(58px + env(safe-area-inset-top)) !important;
-    min-height:calc(58px + env(safe-area-inset-top)) !important;
-  }
-  .top h1{
-    max-width:calc(100vw - 120px) !important;
-    overflow:hidden !important;
-    text-overflow:ellipsis !important;
-    white-space:nowrap !important;
-    font-size:15px !important;
-  }
-  .sideNav{
-    width:min(280px,86vw) !important;
-  }
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{
-    transform:translate3d(min(280px,86vw),0,0) !important;
-  }
-  .sideItem{
-    min-height:48px !important;
-    padding:12px 13px !important;
-  }
-  button{
-    min-height:44px;
-  }
-  input,select,textarea{
-    min-height:44px;
-    font-size:16px !important;
-  }
-}
-
-/* bardzo mały telefon */
-@media (max-width:360px){
-  .sideNav{width:235px !important;}
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{
-    transform:translate3d(235px,0,0) !important;
-  }
-}
-
-/* Safari iOS */
-@supports (-webkit-touch-callout:none){
-  .top,.sideNav{
-    -webkit-backface-visibility:hidden;
-    backface-visibility:hidden;
-  }
-}
-
-
-/* =========================================================
-   ELEGANCKIE MENU BOCZNE + LOGO
-   ========================================================= */
-.sideNav{
-  padding:20px 13px 16px !important;
-  background:
-    radial-gradient(circle at 30% 8%, #8b24431f 0, transparent 28%),
-    linear-gradient(180deg,#3d0b1c 0%,#64152d 52%,#561025 100%) !important;
-}
-
-.brand{
-  position:relative;
-  min-height:78px;
-  margin:0 4px 21px;
-  padding:4px 5px 17px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  border-bottom:1px solid #d7ad5566;
-}
-
-.brandLogo{
-  width:54px;
-  height:54px;
-  flex:0 0 54px;
-  display:grid;
-  place-items:center;
-  position:relative;
-}
-
-.brandCalendar{
-  position:relative;
-  width:43px;
-  height:42px;
-  border:2px solid var(--gold);
-  border-radius:8px;
-  background:linear-gradient(145deg,#7b1d39,#4c0d21);
-  box-shadow:0 4px 12px #0004,inset 0 0 0 1px #ffffff12;
-}
-
-.brandCalendar .ring{
-  position:absolute;
-  top:-8px;
-  width:6px;
-  height:13px;
-  border:2px solid var(--gold);
-  border-radius:5px;
-  background:#64152d;
-}
-.brandCalendar .r1{left:9px}
-.brandCalendar .r2{right:9px}
-
-.brandCalendar .calTop{
-  position:absolute;
-  left:0;
-  right:0;
-  top:9px;
-  height:2px;
-  background:var(--gold);
-  opacity:.9;
-}
-
-.brandCalendar .calBody{
-  position:absolute;
-  left:7px;
-  right:7px;
-  top:16px;
-  bottom:6px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:4px;
-}
-.brandCalendar .calBody i{
-  display:block;
-  width:4px;
-  height:4px;
-  margin:auto;
-  border-radius:50%;
-  background:#ead8a9;
-}
-
-.brandText{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  line-height:1;
-  letter-spacing:2.3px;
-}
-.brandText strong{
-  color:#fff;
-  font-size:16px;
-  font-weight:800;
-}
-.brandText span{
-  margin-top:6px;
-  color:#e1c783;
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:4px;
-}
-
-.menuCaption{
-  padding:0 9px 8px;
-  color:#d9bd7b;
-  font-size:9px;
-  font-weight:800;
-  letter-spacing:2px;
-}
-
-.sideMenu{
-  display:flex;
-  flex-direction:column;
-  gap:5px;
-}
-
-.sideItem{
-  position:relative;
-  isolation:isolate;
-  min-height:50px !important;
-  margin:0 !important;
-  padding:10px 13px !important;
-  display:flex !important;
-  align-items:center !important;
-  gap:13px !important;
-  border:1px solid transparent !important;
-  border-left:3px solid transparent !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  color:#fdfaf5 !important;
-  box-shadow:none !important;
-  transition:background .18s ease,border-color .18s ease,transform .18s ease !important;
-}
-
-.sideItem::after{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  inset:0;
-  border-radius:5px;
-  background:linear-gradient(90deg,#ffffff0c,#ffffff03);
-  opacity:0;
-  transition:opacity .18s ease;
-}
-.sideItem:hover::after{opacity:1}
-
-.sideItem:hover{
-  border-color:#d7ad5538 !important;
-  background:#ffffff08 !important;
-}
-
-.sideItem.active{
-  border-color:#d7ad5570 !important;
-  border-left-color:var(--gold) !important;
-  background:linear-gradient(90deg,#8b2443,#701b36) !important;
-  box-shadow:0 5px 14px #00025,inset 0 0 0 1px #ffffff08 !important;
-}
-
-.menuIcon{
-  width:30px;
-  height:30px;
-  flex:0 0 30px;
-  display:grid;
-  place-items:center;
-  color:#e7ce91;
-  font-size:20px;
-  line-height:1;
-  border:1px solid #d7ad5540;
-  background:#ffffff08;
-  border-radius:4px;
-}
-.sideItem.active .menuIcon{
-  color:#fff4cf;
-  border-color:#d7ad5590;
-  background:#d7ad5518;
-}
-.menuLabel{
-  font-size:14px;
-  font-weight:700;
-  letter-spacing:.15px;
-}
-
-.menuBottom{
-  margin-top:auto;
-  padding:16px 8px 3px;
-  color:#c8aa68;
-  font-size:8px;
-  letter-spacing:1.7px;
-  text-align:center;
-}
-.menuLine{
-  height:1px;
-  margin-bottom:10px;
-  background:linear-gradient(90deg,transparent,#d7ad5570,transparent);
-}
-
-@media(max-width:900px){
-  .sideNav{
-    padding-left:12px !important;
-    padding-right:12px !important;
-  }
-}
-@media(max-width:560px){
-  .brand{min-height:72px;margin-bottom:17px}
-  .brandLogo{width:50px;height:50px;flex-basis:50px}
-  .brandCalendar{transform:scale(.93)}
-  .brandText strong{font-size:15px}
-  .brandText span{font-size:11px}
-  .sideItem{min-height:49px !important}
-}
-
-
-<style id="swipe-menu-fix">
-/* ===== MENU WYSUWANE PALCEM — ANDROID / iOS ===== */
-.sideNav{touch-action:pan-y !important;}
-.sideItem{border-radius:0 !important;}
-.menuToggle{touch-action:manipulation !important;}
-@media (max-width:900px){
-  .sideNav{transition:transform .28s cubic-bezier(.22,.61,.36,1) !important;}
-  body .top,body #login,body #app{transition:transform .28s cubic-bezier(.22,.61,.36,1) !important;}
-}
-</style>
-<style id="new-visit-rodo">
-.newVisitRodo{margin-top:14px;padding:13px;background:#fbf7ef;border:1px solid #d8c8aa}
-.newVisitRodoTitle{font-weight:700;margin-bottom:8px}
-.newVisitRodoRow{display:flex;align-items:flex-start;gap:9px;margin:10px 0;font-size:13px;line-height:1.45;font-weight:normal}
-.newVisitRodoRow input[type="checkbox"]{width:18px;height:18px;flex:0 0 18px;margin:1px 0 0}
-.newVisitRodoRow label{display:inline;margin:0;font-weight:normal;font-size:13px}
-.newVisitRodoLink{display:inline-block;margin-top:2px;color:#64152d;text-decoration:underline;font-weight:bold;cursor:pointer}
-.newVisitRodoSmall{font-size:12px;color:#887d70;margin-top:6px}
-.newVisitRodoModal{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:18px;z-index:10000}
-.newVisitRodoModal.hidden{display:none}
-.newVisitRodoModalBox{width:min(720px,100%);max-height:90vh;overflow:auto;background:#fff;padding:22px;border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,.22);line-height:1.55}
-.newVisitRodoModalBox h2{margin-top:0}
-.newVisitRodoClose{margin-top:8px}
-</style>
-
-</style>
-
-
-<style id="menu-slide-final">
-/* =========================================================
-   MENU BOCZNE — WYSUWANE NA KAŻDYM EKRANIE
-   Komputer / tablet / Android / iOS
-   ========================================================= */
-body{
-  padding-left:0 !important;
-}
-.top{
-  left:0 !important;
-  right:0 !important;
-  width:100% !important;
-  transition:transform .28s cubic-bezier(.22,.61,.36,1) !important;
-  will-change:transform;
-}
-.sideNav{
-  transform:translate3d(-101%,0,0) !important;
-  transition:transform .28s cubic-bezier(.22,.61,.36,1) !important;
-  will-change:transform;
-}
-.sideNav.open{
-  transform:translate3d(0,0,0) !important;
-}
-body.menuOpen .top,
-body.menuOpen #login,
-body.menuOpen #app{
-  transform:translate3d(var(--menu-w),0,0) !important;
-}
-#login,#app{
-  transition:transform .28s cubic-bezier(.22,.61,.36,1) !important;
-  will-change:transform;
-}
-.menuToggle{
-  position:relative !important;
-  z-index:2 !important;
-}
-/* Menu jest zawsze wysuwane — również na dużym monitorze. */
-@media (min-width:901px){
-  .sideNav{
-    width:var(--menu-w) !important;
-    top:0 !important;
-    bottom:0 !important;
-    height:100vh !important;
-    height:100dvh !important;
-  }
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{
-    transform:translate3d(var(--menu-w),0,0) !important;
-  }
-}
-@media (max-width:900px){
-  .sideNav{
-    width:min(300px,84vw) !important;
-  }
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{
-    transform:translate3d(min(300px,84vw),0,0) !important;
-  }
-}
-@media (max-width:560px){
-  .sideNav{width:min(280px,86vw) !important;}
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{
-    transform:translate3d(min(280px,86vw),0,0) !important;
-  }
-}
-@media (max-width:360px){
-  .sideNav{width:235px !important;}
-  body.menuOpen .top,
-  body.menuOpen #login,
-  body.menuOpen #app{transform:translate3d(235px,0,0) !important;}
-}
-/* kwadratowe, eleganckie elementy — bez zaokrągleń */
-.sideItem,.menuToggle,.top,.sideNav{border-radius:0 !important;}
-</style>
-
-
-<style id="rodo-admin-v1">
-/* ===== RODO — PANEL ADMINA v1 ===== */
-.rodoToolbar{
-  display:grid;
-  grid-template-columns:1.5fr .8fr .8fr auto;
-  gap:8px;
-  margin-bottom:12px;
-}
-.rodoSummary{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin-bottom:12px;
-}
-.rodoStat{
-  border:1px solid var(--line);
-  background:#f8f3e9;
-  padding:10px;
-}
-.rodoStat strong{
-  display:block;
-  color:var(--b);
-  font-size:18px;
-  margin-bottom:2px;
-}
-.rodoStat span{font-size:11px;color:var(--muted)}
-.rodoTable .rodoYes{
-  color:var(--ok);
-  font-weight:bold;
-}
-.rodoTable .rodoNo{
-  color:var(--bad);
-  font-weight:bold;
-}
-.rodoDetail{
-  margin-top:10px;
-  padding:10px;
-  border-left:3px solid var(--gold);
-  background:#f8f3e9;
-  font-size:12px;
-}
-.rodoDetailGrid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:6px 16px;
-}
-.rodoLoading{padding:22px;text-align:center;color:var(--muted)}
-.rodoError{
-  padding:10px;
-  border:1px solid #d5a0a0;
-  background:var(--badbg);
-  color:var(--bad);
-  font-size:13px;
-}
-.rodoActions{display:flex;gap:5px;align-items:center;justify-content:flex-start;white-space:nowrap}
-.rodoAction{width:34px;min-width:34px;height:34px;min-height:34px;padding:0!important;display:inline-grid;place-items:center;font-size:17px;line-height:1;border:1px solid var(--line);background:#fff;color:var(--b);cursor:pointer}
-.rodoAction.edit{color:var(--b);border-color:#d7ad55;background:#fffaf0}
-.rodoAction.delete{color:#b01825;border-color:#d5a0a0;background:#fff5f5}
-.rodoAction.save{color:var(--ok);border-color:#9fbd8e;background:var(--okbg);font-size:16px}
-.rodoAction.cancel{color:var(--bad);border-color:#d5a0a0;background:var(--badbg);font-size:16px}
-.rodoEditRow td{background:#fffaf0!important;vertical-align:middle}
-.rodoTable tr.rodoSelected td{background:#fff8e6}
-.rodoEditRow input,.rodoEditRow select{min-width:90px;padding:7px;font-size:12px}
-.rodoEditGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.rodoEditGrid label{font-size:11px;margin:0 0 3px}
-.rodoReadonly{background:#eee9df!important;color:var(--muted)!important}
-@media(max-width:560px){.rodoActions{position:sticky;left:0}.rodoAction{width:36px;min-width:36px;height:36px}}
-
-@media(max-width:900px){
-  .rodoToolbar{grid-template-columns:1fr 1fr}
-  .rodoSummary{grid-template-columns:1fr 1fr}
-}
-@media(max-width:560px){
-  .rodoToolbar,.rodoSummary{grid-template-columns:1fr}
-  .rodoTable th,.rodoTable td{white-space:nowrap}
-  .rodoDetailGrid{grid-template-columns:1fr}
-}
-</style>
-
-
-<style id="menu-scrollbar-hidden">
-/* ===== MENU BOCZNE — bez widocznego paska przewijania ===== */
-.sideNav{
-  scrollbar-width:none !important;
-  -ms-overflow-style:none !important;
-}
-.sideNav::-webkit-scrollbar{
-  width:0 !important;
-  height:0 !important;
-  display:none !important;
-}
-</style>
-
-
-<style id="admin-users-v2">
-/* ===== ADMINISTRATORZY — ETAP 2 ===== */
-.adminBox{margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
-.adminHeader h3{margin:0 0 8px;color:var(--b);font-size:18px}
-.adminNotice{padding:10px;border:1px solid var(--line);background:#f8f3e9;font-size:12px;line-height:1.5;margin-bottom:12px}
-.adminStatus{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px;border:1px solid var(--line);background:#fff}
-.adminStatusLabel{font-size:12px;color:var(--muted)}
-.adminRole{display:inline-block;padding:4px 8px;border:1px solid var(--line);font-weight:bold}
-.adminRole.user{background:#f3f3f3;color:#555}
-.adminRole.admin{background:var(--okbg);color:var(--ok);border-color:#9fbd8e}
-.adminForm{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:end}
-.adminForm label{margin:0}
-.adminBtn{min-height:42px;padding:9px 12px;border:1px solid var(--line);cursor:pointer;font-size:12px;font-weight:bold}
-.adminBtn.grant{border-color:#9fbd8e;background:var(--okbg);color:var(--ok)}
-.adminBtn.revoke{border-color:#d5a0a0;background:var(--badbg);color:var(--bad)}
-.adminBtn:disabled{opacity:.5;cursor:not-allowed}
-.adminHint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
-@media(max-width:700px){.adminForm{grid-template-columns:1fr}.adminBtn{width:100%}}
-
-/* =========================================================
-   ETAP 3B — UŻYTKOWNICY / HASŁA
-   ========================================================= */
-.passwordBox{margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
-.passwordBox h3,.usersBox h3{margin:0 0 8px;color:var(--b);font-size:18px}
-.passwordGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.passwordGrid .full{grid-column:1/-1}
-.passwordHint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
-.usersBox{margin-top:18px;border-top:1px solid var(--line);padding-top:18px}
-.usersToolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-.usersStats{display:flex;gap:8px;flex-wrap:wrap}
-.userStat{padding:6px 9px;border:1px solid var(--line);background:#fff;font-size:11px;font-weight:bold;color:var(--muted)}
-.userStat strong{color:var(--b);font-size:13px}
-.userTable td,.userTable th{white-space:nowrap}
-.userEmail{font-weight:bold;color:var(--b)}
-.onlineBadge{display:inline-block;padding:4px 8px;border:1px solid var(--line);font-size:11px;font-weight:bold}
-.onlineBadge.online{background:var(--okbg);color:var(--ok);border-color:#9fbd8e}
-.onlineBadge.offline{background:#f3f3f3;color:#666}
-.adminMini{display:inline-block;padding:4px 8px;border:1px solid #9fbd8e;background:var(--okbg);color:var(--ok);font-size:11px;font-weight:bold}
-.userMini{display:inline-block;padding:4px 8px;border:1px solid var(--line);background:#f7f4ee;color:#666;font-size:11px;font-weight:bold}
-.usersEmpty{padding:14px;text-align:center;color:var(--muted);font-size:12px}
-.recoveryWrap{max-width:520px;margin:30px auto;padding:10px}
-.recoveryCard{background:var(--card);border:1px solid var(--line);padding:18px;box-shadow:0 2px 8px #0001}
-.recoveryCard h2{margin:0 0 12px;color:var(--b);font-size:20px}
-.recoveryActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.recoveryActions>*{flex:1}
-@media(max-width:700px){.passwordGrid{grid-template-columns:1fr}.passwordGrid .full{grid-column:auto}.userTable td,.userTable th{white-space:normal}}
 </style>
 </head>
 <body>
-<header class="top">
-<button type="button" id="menuToggle" class="menuToggle" aria-label="Otwórz menu"><span></span><span></span><span></span></button>
-<h1>TERMINARZ WIZYT</h1>
-<div class="spacer"></div>
-<button id="logout" class="hidden">Wyloguj</button>
+<header>
+
+
+
+
+<div style="display: flex; justify-content: center; width: 100%;">
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <img src="./aj_logo.png" style="height: 4.5rem;">
+    <div>
+      <h3 id="calendarName" style="margin: 0; font-size: 2rem;">Umów wizytę</h3>
+      <div id="ownerName">Wybierz usługę, dzień i wolną godzinę</div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
 </header>
-<aside id="sideNav" class="sideNav">
-  <div class="brand">
-    <div >
 
+<div class="wrap">
+  <div id="clientSettings" class="card client-settings hidden">
+    <h2 id="clientSettingsTitle">Informacje o gabinecie</h2>
+    <div id="clientOwner" class="client-owner"></div>
+    <div id="clientContact" class="client-contact"></div>
+    <div id="clientInfo" class="client-info hidden"></div>
+  </div>
+  <div class="card">
+    <label for="masseur">Wybierz Masażystę</label>
+    <select id="masseur" required>
+      <option value="">— wybierz masażystę —</option>
+      <option value="Agata">Agata</option>
+      <option value="Andrzej">Andrzej</option>
+    </select>
+
+    <label for="service">Rodzaj wizyty</label>
+    <select id="service" required>
+      <option value="">— wybierz rodzaj wizyty —</option>
+      <option value="masaż ciała">masaż ciała</option>
+      <option value="masaż twarzy">masaż twarzy</option>
+      <option value="masaż gorącymi kamieniami">masaż gorącymi kamieniami</option>
+      <option value="masaż maseczka/maskalat">masaż maseczka/maskalat</option>
+    </select>
+    <label for="duration">Czas planowanej wizyty</label>
+    <select id="duration" required>
+      <option value="">— wybierz czas —</option>
+      <option value="30">30 min</option>
+      <option value="60">60 min</option>
+      <option value="90">90 min</option>
+    </select>
+
+    <label for="date">Data</label>
+    <input id="date" type="date">
+
+    <div class="notice" id="slotsTitle">Dostępne godziny:</div>
+    <div id="dayInfo" class="small"></div>
+    <div id="slots" class="slots"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Twoje dane</h2>
+    <label for="name">Imię i nazwisko</label>
+    <input id="name" autocomplete="name" required>
+
+    <div class="grid">
       <div>
-<span><img src="./terminarz_1.png" style="height: 3.0rem;"><span>
-        
-
-
+        <label for="phone">Telefon</label>
+        <input id="phone" type="tel" autocomplete="tel" required>
+      </div>
+      <div>
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="email" required>
       </div>
     </div>
-    <div class="brandText">
-      <strong>TERMINARZ</strong>
-      <span>WIZYT</span>
+
+    <label for="note">Uwagi</label>
+    <textarea id="note" rows="3"></textarea>
+
+
+    <div class="rodo-box">
+      <div class="status-title">🔒 Twoje dane</div>
+
+      <div class="rodo-row">
+        <input id="rodo" type="checkbox" required>
+        <div>
+          <label for="rodo">Zapoznałam/em się z informacją o przetwarzaniu danych osobowych. <b>*</b></label>
+          <br>
+          <span id="openRodo" class="rodo-link">Przeczytaj informację RODO</span>
+        </div>
+      </div>
+
+      <div class="rodo-row">
+        <input id="marketing" type="checkbox">
+        <div>
+          <label for="marketing">Chcę otrzymywać informacje o usługach i dostępnych terminach drogą e-mail lub SMS.</label>
+        </div>
+      </div>
+
+      <div class="small">* Potwierdzenie zapoznania się z informacją jest wymagane do wysłania rezerwacji.</div>
     </div>
-  </div>
 
+    <div id="rodoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rodoTitle">
+      <div class="modal">
+        <h2 id="rodoTitle">Informacja o przetwarzaniu danych osobowych</h2>
+        <p><b>Administratorem danych osobowych jest Agata Jankowska, ul. Kolejowa 26D,83-200 Starogard Gdański,
+Pomorskiek.</b></p>
 
+        <p>Dane podane w formularzu „Umów wizytę”, w szczególności imię i nazwisko, numer telefonu, adres e-mail oraz informacje przekazane w polu „Uwagi”, są przetwarzane w celu obsługi rezerwacji wizyty, kontaktu w sprawie rezerwacji oraz organizacji umówionej wizyty.</p>
 
+        <p>Podanie danych oznaczonych jako wymagane jest niezbędne do obsługi rezerwacji. Dane niezbędne do realizacji rezerwacji nie są przetwarzane na podstawie dobrowolnej zgody, jeżeli podstawą ich przetwarzania jest zawarcie lub wykonanie umowy albo inna właściwa podstawa prawna.</p>
 
+        <p>Masz prawo, w przypadkach przewidzianych przez RODO, do dostępu do swoich danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia danych oraz wniesienia sprzeciwu. Przysługuje Ci również prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych.</p>
 
+        <p>Jeżeli wyrazisz dobrowolną zgodę marketingową, możesz ją wycofać w dowolnym momencie. Wycofanie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej wycofaniem.</p>
 
-
-
-  <div class="menuCaption">MENU GŁÓWNE</div>
-
-  <nav class="sideMenu" aria-label="Menu główne">
-    <button type="button" class="sideItem active" data-panel="calendarPanel">
-      <span class="menuIcon">▦</span><span class="menuLabel">Terminarz</span>
-    </button>
-    <button type="button" class="sideItem" data-panel="visitsPanel">
-      <span class="menuIcon">☷</span><span class="menuLabel">Wizyty</span>
-    </button>
-    <button type="button" class="sideItem" data-panel="servicesPanel">
-      <span class="menuIcon">✦</span><span class="menuLabel">Usługi</span>
-    </button>
-    <button type="button" class="sideItem" data-panel="hoursPanel">
-      <span class="menuIcon">◷</span><span class="menuLabel">Godziny pracy</span>
-    </button>
-    <button type="button" class="sideItem" data-panel="offPanel">
-      <span class="menuIcon">◇</span><span class="menuLabel">Dni wolne</span>
-    </button>
-    <button type="button" class="sideItem" data-panel="settingsPanel">
-      <span class="menuIcon">⚙</span><span class="menuLabel">Ustawienia</span>
-    </button>
-    <button type="button" class="sideItem" data-panel="rodoPanel">
-      <span class="menuIcon">✓</span><span class="menuLabel">RODO</span>
-    </button>
-
-
-
-
-
-
-
-
-
-
-
-
-<div style="display: flex; gap: 0.5rem;">
-  <button type="button" class="sideItem" data-panel="" onclick="window.location.href='o_programie.htm'">
-    <span class="menu-icon">ⓘ</span>
-  </button>
-    <button type="button" class="sideItem" data-panel="licencePanel">
-      <span class="menuIcon">▤</span>
-    </button>
-
-
-  <button type="button" class="sideItem" onclick="window.location.href='mailto:anita.wrzesinska@gmail.com'">
-    <span>✉</span>
-  </button>
-</div>
-
-
-
-
-
-
-  </nav>
-
-  <div class="menuBottom">
-    <div class="menuLine"></div>
-
-<div class="dm-brand-title" style="display: inline-flex; align-items: center; gap: 8px;">
-    autor: <img src="./imie-i-nazwisko-2.png" style="height: 1.5rem; width: 10rem;" alt="Imię i nazwisko autora">
-</div>
-
-</div>
-
-
-</aside>
-<div id="navShade" class="navShade"></div>
-<section id="login" class="card">
-<h2>Logowanie</h2><div class="notice">Wspólna baza online – zaloguj się swoim kontem.</div>
-<label>E-mail</label><input id="email" type="email" autocomplete="username">
-<label>Hasło</label><input id="password" type="password" autocomplete="current-password">
-<div class="actions"><button id="loginBtn">Zaloguj</button><button id="signupBtn" class="secondary">Utwórz konto</button></div>
-<div class="actions" style="margin-top:8px"><button type="button" id="forgotPasswordBtn" class="secondary smallBtn">Nie pamiętasz hasła?</button></div>
-<div id="loginMsg" class="muted"></div>
-</section>
-<section id="recoveryPanel" class="recoveryWrap hidden">
-  <div class="recoveryCard">
-    <h2>Ustaw nowe hasło</h2>
-    <div class="notice">Ustaw nowe hasło do swojego konta. Hasło nie jest zapisywane przez aplikację — obsługuje je bezpiecznie Supabase Auth.</div>
-    <label>Nowe hasło</label><input id="recoveryPassword" type="password" autocomplete="new-password">
-    <label>Powtórz nowe hasło</label><input id="recoveryPassword2" type="password" autocomplete="new-password">
-    <div class="recoveryActions"><button type="button" id="recoverySaveBtn">Zapisz nowe hasło</button></div>
-    <div id="recoveryMsg" class="help"></div>
-  </div>
-</section>
-<main id="app" class="wrap hidden">
-<div id="sync" class="notice">● Połączono z bazą online</div>
-<nav class="tabs">
-<button class="tab active" data-tab="calendarPanel">TERMINARZ</button><button class="tab" data-tab="visitsPanel">WIZYTY</button><button class="tab" data-tab="servicesPanel">USŁUGI</button><button class="tab" data-tab="hoursPanel">GODZINY PRACY</button><button class="tab" data-tab="offPanel">DNI WOLNE</button><button class="tab" data-tab="settingsPanel">USTAWIENIA</button><button class="tab" data-tab="rodoPanel">RODO</button><button class="tab" data-tab="licencePanel">RODO</button>
-
-</nav>
-<section id="calendarPanel" class="panel active">
-<div class="grid2">
-<section class="card"><h2>Nowa wizyta</h2><form id="form">
-<label>Imię i nazwisko klienta</label><input id="client" required>
-<label>Data</label><input id="date" type="date" required><div id="availableTimesWrap" class="availableTimesWrap"><label>Dostępna godzina wizyty</label><div id="availableTimes" class="slotPicker"><div class="empty">Najpierw wybierz datę.</div></div><div id="timeHelp" class="help">Po wybraniu daty zostaną pokazane dostępne godziny. Dla dzisiejszego dnia minione godziny są ukrywane.</div></div>
-<label>Wybierz Masażystę</label><select id="masseur" required><option value="">— wybierz masażystę —</option><option value="Agata">Agata</option><option value="Andrzej">Andrzej</option></select>
-<label>Rodzaj wizyty</label><select id="service" required><option value="">— wybierz rodzaj wizyty —</option><option value="masaż ciała">masaż ciała</option><option value="masaż twarzy">masaż twarzy</option><option value="masaż gorącymi kamieniami">masaż gorącymi kamieniami</option><option value="masaż z maseczką/ maskalat">masaż z maseczką/ maskalat</option></select>
-<div class="row"><div><label>Czas trwania</label><select id="duration"><option>30</option><option>45</option><option selected>60</option><option>90</option><option>120</option></select></div><div><label>Telefon</label><input id="phone" type="tel"></div></div>
-<label>E-mail klienta</label><input id="clientEmail" type="email" autocomplete="email"><label>Notatka</label><textarea id="note"></textarea>
-<div class="newVisitRodo">
-  <div class="newVisitRodoTitle">🔒 Informacja o danych osobowych</div>
-  <div class="newVisitRodoRow">
-    <input id="newVisitRodo" type="checkbox" required>
-    <div>
-      <label for="newVisitRodo">Potwierdzam, że klient został poinformowany o przetwarzaniu jego danych osobowych i zapoznał się z informacją RODO. <b>*</b></label>
-      <br>
-      <span id="openNewVisitRodo" class="newVisitRodoLink">Przeczytaj klauzulę RODO</span>
+        <p><b>Wersja informacji:</b> 1.0</p>
+        <button type="button" id="closeRodo" class="modal-close">Zamknij</button>
+      </div>
     </div>
-  </div>
-  <div class="newVisitRodoRow">
-    <input id="newVisitMarketing" type="checkbox">
-    <div><label for="newVisitMarketing">Klient wyraził dobrowolną zgodę na otrzymywanie informacji o usługach i dostępnych terminach drogą e-mail lub SMS.</label></div>
-  </div>
-  <div class="newVisitRodoSmall">* Potwierdzenie jest wymagane do zapisania nowej wizyty.</div>
-</div>
-<div id="newVisitRodoModal" class="newVisitRodoModal hidden" role="dialog" aria-modal="true" aria-labelledby="newVisitRodoTitle">
-  <div class="newVisitRodoModalBox">
-    <h2 id="newVisitRodoTitle">Informacja o przetwarzaniu danych osobowych</h2>
-    <p><b>Administratorem danych osobowych jest Agata Jankowska, ul. Kolejowa 26D, 83-200 Starogard Gdański
-Pomorskie.</b></p>
-    <p>Dane podane w formularzu „Umów wizytę”, w szczególności imię i nazwisko, numer telefonu, adres e-mail oraz informacje przekazane w polu „Notatka”, są przetwarzane w celu obsługi rezerwacji wizyty, kontaktu w sprawie rezerwacji oraz organizacji umówionej wizyty.</p>
-    <p>Podanie danych oznaczonych jako wymagane jest niezbędne do obsługi rezerwacji. Dane niezbędne do realizacji rezerwacji nie są przetwarzane na podstawie dobrowolnej zgody, jeżeli podstawą ich przetwarzania jest zawarcie lub wykonanie umowy albo inna właściwa podstawa prawna.</p>
-    <p>Klient ma prawo, w przypadkach przewidzianych przez RODO, do dostępu do swoich danych, ich sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia danych oraz wniesienia sprzeciwu. Przysługuje mu również prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych.</p>
-    <p>Jeżeli klient wyrazi dobrowolną zgodę marketingową, może ją wycofać w dowolnym momencie. Wycofanie zgody nie wpływa na zgodność z prawem przetwarzania dokonanego przed jej wycofaniem.</p>
-    <p><b>Wersja informacji: 1.0</b></p>
-    <button type="button" id="closeNewVisitRodo" class="secondary newVisitRodoClose">Zamknij</button>
+
+    <button id="book" disabled>Wyślij rezerwację</button>
+    <div id="msg" class="notice">Rezerwacja wymaga potwierdzenia przez właściciela.</div>
+
+
+
+
+
+
+
+
+
   </div>
 </div>
-<div class="actions"><button type="submit">+ Umów wizytę</button><button type="button" id="clear" class="secondary">Wyczyść</button></div></form></section>
-<section class="card"><div class="monthbar"><button id="prev">‹</button><strong id="title"></strong><button id="next">›</button></div><div class="week" id="calendar"></div><div class="legend"><span><i class="dot pending"></i>Oczekuje</span><span><i class="dot confirmed"></i>Potwierdzona</span><span><i class="dot rejected"></i>Odrzucona</span><span><i class="dot off"></i>Dzień wolny</span></div></section>
-<section class="card" style="grid-column:1/-1"><div class="sectionTitle"><h2>Wizyty: <span id="selectedLabel"></span></h2><span class="count" id="count"></span></div><div id="dayList"></div></section>
-</div></section>
-<section id="visitsPanel" class="panel"><section class="card"><div class="sectionTitle"><h2>Wszystkie wizyty</h2><span class="count" id="allCount"></span></div>
-<div class="filters"><input id="visitSearch" placeholder="Szukaj: klient, telefon, e-mail"><select id="visitStatus"><option value="">Wszystkie statusy</option><option value="oczekuje">Oczekujące</option><option value="potwierdzona">Potwierdzone</option><option value="odrzucona">Odrzucone</option></select><input id="visitFrom" type="date" title="Od"><input id="visitTo" type="date" title="Do"></div><div class="actions" style="margin-top:0"><button id="clearVisitFilters" class="secondary smallBtn">Wyczyść filtry</button></div><div class="tableWrap"><table class="table"><thead><tr><th>Data</th><th>Godzina</th><th>Klient</th><th>Masażysta</th><th>Usługa</th><th>Kontakt</th><th>Status</th><th>Akcje</th></tr></thead><tbody id="visitsTable"></tbody></table></div></section></section>
-<section id="servicesPanel" class="panel"><section class="card"><h2>Usługi</h2><form id="serviceForm"><div class="row"><div><label>Nazwa usługi</label><input id="serviceName" required></div><div><label>Czas trwania (min)</label><input id="serviceMinutes" type="number" min="5" step="5" value="30" required></div></div><label class="toggle"><input id="serviceActive" type="checkbox" checked> Usługa aktywna</label><div class="actions"><button type="submit" id="serviceSaveBtn">Dodaj usługę</button><button type="button" id="serviceCancel" class="secondary hidden">Anuluj edycję</button></div><div id="serviceMsg" class="help"></div></form><div id="servicesList"></div></section></section>
-<section id="hoursPanel" class="panel"><section class="card"><h2>Godziny pracy</h2><div class="help">Ustaw godziny dla każdego dnia. Wyłącz dzień, jeśli nie przyjmujesz wtedy wizyt.</div><div id="hoursList"></div><div class="actions"><button id="saveHours">Zapisz godziny pracy</button></div><div id="hoursMsg" class="help"></div></section></section>
-<section id="offPanel" class="panel"><section class="card"><h2>Dni wolne / urlop</h2><form id="offForm"><div class="row"><div><label>Od</label><input id="offFrom" type="date" required></div><div><label>Do</label><input id="offTo" type="date" required></div></div><label>Opis</label><input id="offDesc" placeholder="np. Urlop"><div class="actions"><button type="submit">Dodaj dzień wolny</button></div><div id="offMsg" class="help"></div></form><div id="offList"></div></section></section>
-<section id="settingsPanel" class="panel"><section class="card"><h2>Ustawienia</h2><div class="help">Te podstawowe dane są zapisywane w bazie Supabase dla tego terminarza. Dzięki temu ustawienia są wspólne dla urządzeń.</div><form id="settingsForm" class="settingsGrid"><div><label>Nazwa terminarza</label><input id="setName"></div><div><label>Nazwa osoby / gabinetu</label><input id="setOwner"></div><div><label>Telefon kontaktowy</label><input id="setPhone"></div><div><label>E-mail kontaktowy</label><input id="setEmail" type="email"></div><div style="grid-column:1/-1"><label>Informacja dla klienta</label><textarea id="setMessage" placeholder="Np. Wybierz dogodny termin i usługę."></textarea></div><div style="grid-column:1/-1" class="actions"><button>Zapisz ustawienia</button></div></form><div id="settingsMsg" class="help"></div>
-<div class="passwordBox"><h3>Zmiana hasła</h3><div class="help">Po zalogowaniu możesz ustawić nowe hasło do swojego konta.</div><form id="changePasswordForm" class="passwordGrid"><div><label>Nowe hasło</label><input id="newPassword" type="password" autocomplete="new-password" minlength="6"></div><div><label>Powtórz nowe hasło</label><input id="newPassword2" type="password" autocomplete="new-password" minlength="6"></div><div class="full"><div class="passwordHint">Hasła muszą być identyczne. Hasło obsługuje Supabase Auth — aplikacja nie zapisuje go w tabelach.</div></div><div class="full actions"><button type="submit">Zmień hasło</button></div></form><div id="passwordMsg" class="help"></div></div>
-<div class="adminBox"><div class="adminHeader"><h3>Administratorzy</h3></div><div class="adminNotice">Zarządzanie administratorami odbywa się przez bezpieczne funkcje Supabase. Nie odczytujemy bezpośrednio tabeli <b>auth.users</b> w przeglądarce.</div><div class="adminStatus"><div><div class="adminStatusLabel">Zalogowany użytkownik</div><b id="adminCurrentEmail">—</b></div><span id="adminCurrentRole" class="adminRole user">Sprawdzanie roli…</span></div><div class="adminForm"><div><label for="adminTargetEmail">E-mail użytkownika</label><input id="adminTargetEmail" type="email" autocomplete="off" placeholder="np. użytkownik@example.com"></div><button type="button" id="adminGrantBtn" class="adminBtn grant">Nadaj administratora</button><button type="button" id="adminRevokeBtn" class="adminBtn revoke">Odbierz administratora</button></div><div class="adminHint">Wpisz dokładny e-mail konta, któremu chcesz nadać albo odebrać uprawnienia. Operację może wykonać wyłącznie administrator.</div><div id="adminMsg" class="help" style="margin-top:8px"></div></div>
-<div id="usersAdminArea" class="usersBox hidden"><div class="usersToolbar"><div><h3>Użytkownicy systemu</h3><div class="help">Lista widoczna wyłącznie dla administratora. Dane są pobierane przez bezpieczną funkcję Supabase.</div></div><button type="button" id="usersRefreshBtn" class="secondary smallBtn">Odśwież listę</button></div><div class="usersStats"><span class="userStat">Wszyscy: <strong id="usersTotal">0</strong></span><span class="userStat">Aktywni: <strong id="usersOnline">0</strong></span><span class="userStat">Administratorzy: <strong id="usersAdmins">0</strong></span></div><div class="tableWrap"><table class="table userTable"><thead><tr><th>E-mail</th><th>Status</th><th>Uprawnienia</th><th>Utworzono</th><th>Ostatnie logowanie</th><th>Ostatnia aktywność</th></tr></thead><tbody id="usersTable"></tbody></table></div><div id="usersMsg" class="help"></div></div>
-<div id="adminsListArea" class="usersBox hidden"><div class="usersToolbar"><div><h3>Administratorzy</h3><div class="help">Osoby posiadające uprawnienia administratora w tym terminarzu.</div></div></div><div class="tableWrap"><table class="table userTable"><thead><tr><th>E-mail</th><th>Status</th><th>Utworzono</th><th>Ostatnie logowanie</th><th>Ostatnia aktywność</th></tr></thead><tbody id="adminsTable"></tbody></table></div><div id="adminsMsg" class="help"></div></div>
-</section></section>
-<section id="rodoPanel" class="panel">
-<section class="card">
-  <div class="sectionTitle">
-    <h2>Zgody RODO</h2>
-    <span class="count" id="rodoCount"></span>
+
+
+
+
+
+<br>
+
+
+
+
+
+
+
+
+
+<div class="menuBottom" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <div class="menuLine" style="border-top: 2px solid #800020; margin-bottom: 10px; width: 100%; max-width: 300px;"></div>
+
+  <div class="dm-brand-title" style="display: flex; align-items: center; gap: 6px; justify-content: center;">
+    <span>autor:</span>
+    <img src="./imie-i-nazwisko-2.png" style="height: 1.5rem; width: 10rem; object-fit: contain;" alt="Anita Wrzesińska">
   </div>
-
-  <div class="help" style="margin-bottom:12px">
-    Dane są pobierane wyłącznie przez bezpieczną funkcję administracyjną
-    <b>pobierz_zgody_rodo_admin</b>. Panel nie odczytuje bezpośrednio tabeli
-    <b>zgody_rodo</b>.
-  </div>
-
-  <div class="rodoSummary">
-    <div class="rodoStat"><strong id="rodoTotal">0</strong><span>Wszystkich zgód</span></div>
-    <div class="rodoStat"><strong id="rodoConfirmed">0</strong><span>Potwierdzone RODO</span></div>
-    <div class="rodoStat"><strong id="rodoMarketing">0</strong><span>Zgód marketingowych</span></div>
-  </div>
-
-  <div class="rodoToolbar">
-    <input id="rodoSearch" placeholder="Szukaj: klient, telefon, e-mail">
-    <input id="rodoFrom" type="date" title="Od">
-    <input id="rodoTo" type="date" title="Do">
-    <button id="rodoRefresh" class="secondary smallBtn" type="button">Odśwież</button>
-  </div>
-
-  <div id="rodoMsg" class="help" style="margin-bottom:8px"></div>
-
-  <div class="tableWrap">
-    <table class="table rodoTable">
-      <thead>
-        <tr>
-          <th>Data zgody</th>
-          <th>Klient</th>
-          <th>Telefon</th>
-          <th>E-mail</th>
-          <th>RODO</th>
-          <th>Wersja</th>
-          <th>Marketing</th>
-          <th>Data marketingu</th><th>Akcje</th>
-        </tr>
-      </thead>
-      <tbody id="rodoTable"></tbody>
-    </table>
-  </div>
-  <div id="rodoDetail" class="rodoDetail hidden"></div>
-</section>
-</section>
-
-<section id="licencePanel" class="panel">
-<section class="card">
-  <div class="sectionTitle">
-    <h2>Licecncja Programu</h2>
-    <span class="count" id="licenceCount"></span>
-  </div>
-
-<p>UMOWA LICENCYJNA</p><p>
-
-
-<p>ROZDZIAŁ 1. POSTANOWIENIA WSTĘPNE</p><p>
-
-<p>1. Umowa niniejsza określa w szczególności warunki korzystania, kopiowania i
-rozpowszechnia aplikacji TERMINARZ WIZYT 
-(zwanego dalej "Aplikacją").  Stronami umowy jest producent / autor aplikacji:
-Anita Wrzesińska ul. Kazimierza Leskiego 24/1 80-180 Gdańsk (zwany dalej "Licencjodawcą") 
-oraz każdy podmiot, tj. osoba fizyczna, prawna lub jednostka organizacyjna posiadająca 
-zdolność prawną, który dokonuje jakichkolwiek czynności mających za przedmiot Aplikację,
- a w szczególności z niego korzysta, ("Użytkownik").</p><p>
-
-<p>2. Użytkownik nabywa wobec Aplikacji i Licencjodawcy wyłącznie takie uprawnienia, jakie 
-wynikają wprost z niniejszej umowy i z przepisów obowiązującego prawa, któremu Użytkownik
- terytorialnie podlega. Innymi słowy, uzyskuje on odnośnie Aplikacji jedynie ograniczoną licencję.
-Użytkownik nie nabywa też prawa do udzielania dalszych licencji (sublicencji) bez wyraźnej zgody 
-Licencjodawcy.</p><p>
-
-<p>3. Stosunki zobowiązaniowe wynikłe z niniejszej umowy podlegają prawu polskiemu.</p><p>
-
-<p>4. Jeżeli ze względu na przepisy obowiązującego prawa, któremu Użytkownik podlega ze względu 
-na swoją lokalizację, niektóre postanowienia niniejszej umowy nie będą ważne lub skuteczne, 
-wówczas w pozostałym swoim zakresie umowa będzie stosowana w maksymalnym stopniu możliwym 
-do osiągnięcia w świetle lokalnego prawa Użytkownika.</p><p>
-
-
-<p>ROZDZIAŁ 2. LICENCJA APLIKACJI</p><p>
-
-<p>5. W skład Pakietu wchodzi aplikacja pod pełną nazwą TERMINARZ WIZYT:</p><p>
-<p>- TERMINARZ
-<p>- WIZYTY
-<p>- USŁUGI
-<p>- GODZINY PRACY
-<p>- DNI WOLNE
-<p>- USTAWIENIA
-<p>- RODO
-<p>- O PROGRAMIE
-<p>- LICENCJA  
-<p>- Aplikacja nosi nazwę TERMINARZ WIZYT   a jej nazwa skrócona to: <strong> TW </strong> ,</p><p>
-
-
-
-<p>6. Korzystanie z Pakietu wymaga wniesienia opłaty licencyjnej.</p><p>
-
-<p>7. Użytkownik może tworzyć i przechowywać uzasadnioną jego potrzebami liczbę kopii Aplikacji, 
-lecz bez możliwości jej dalszego rozpowszechniania. Każda kopia Aplikacji powinna być kompletna, 
-tj. zawierać wszystkie pliki jakie znajdują się w oryginalnych kopiach pochodzących od Licencjodawcy.</p><p>
-
-<p>8. Liczba stanowisk, na których Użytkownik może korzystać z Aplikacji jest ograniczona do jednego
-stanowiska. Z Pakietu można korzystać z dowolnego nośnika danych, zarówno lokalnie jak i zdalnie.</p><p>
-
-<p>9. Użytkownik nie może przekazywać kopii Aplikacji osobie lub osobom trzecim. 
-Odpłatne rozpowszechnianie Pakietu wymaga wyraźnej zgody Licencjodawcy.</p><p>
-
-<p>10. Aplikacja dostarczana jest Użytkownikowi w formie "jak jest" - Użytkownik nie będzie zgłaszał 
-wobec Licencjodawcy żadnych roszczeń w zakresie jego przeznaczenia, wymagań technicznych, wyglądu
-lub funkcjonalności. Licencjodawca nie gwarantuje także bezbłędności działania Aplikacji; 
-w tym zakresie każdy używa go jedynie na własne ryzyko i Licencjodawca nie ponosi odpowiedzialności 
-za ewentualne szkody wynikłe w jakikolwiek sposób z jej działania lub niedziałania.</p><p>
-
-<p>11. Jeśli bezwzględnie wiążące przepisy prawa nie stanowią inaczej, Użytkownikowi nie wolno poddawać
-Aplikacji dekompilacji i śledzeniu oraz pozyskiwać lub wykorzystywać fragmentów jego kodu lub zawartych
-w nim zasobów do innych celów i rozwiązań, a w szczególności stosować w innych programach; nie wolno 
-także dokonywać żadnych zmian w treści plików wskazanych w pkt 7, chyba że ich modyfikacja należy 
-do istoty korzystania z Pakietu.</p><p>
-
-
-<p>ROZDZIAŁ 3. POSTANOWIENIA KOŃCOWE</p><p>
-
-<p>12. Umowa ma za przedmiot jedynie Pakiet Aplikacji w postaci skompilowanej, w jakiej udostępnia Licencjodawca. Użytkownik nie może domagać się dostarczenia Pakietu w żadnej innej postaci, 
-w tym kodu źródłowego.</p><p>
-
-<p>13. Umowa odnosi się tylko i wyłącznie do tej konsolidacji Pakietu, do której została dołączona.</p><p>
-
-<p>14. Umowa zawarta zostaje na czas nieokreślony. Ulegnie rozwiązaniu jeśli Użytkownik w sposób trwały 
-zaprzestanie działań czyniących go jej stroną (jak określono w pkt 1).</p><p>
-
-
-
 </div>
 
 
 
 
 
-</section>
 
-</section>
-</main>
+
 <script>
+'use strict';
 
-/* ===== MENU — klik + wysuwanie palcem Android/iOS, bez dotykania bazy/logowania ===== */
-(function(){
-  const toggle=document.getElementById('menuToggle');
-  const side=document.getElementById('sideNav');
-  if(!toggle || !side) return;
+const C = window.TERM_CONFIG || {};
+const sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_PUBLISHABLE_KEY);
+const W = C.WORKSPACE_ID;
+const $ = id => document.getElementById(id);
 
-  const menuWidth=()=>Math.min(side.getBoundingClientRect().width || 280, window.innerWidth*.88);
-  let touchStartX=0, touchStartY=0, touchX=0, dragging=false, tracking=false;
-  const EDGE=28, THRESHOLD=55;
+let services = [];
+let workHours = [];
+let daysOff = [];
+let selected = '';
+let loadingSlots = false;
+const RODO_VERSION = '1.0';
+const RODO_ADMIN = 'Anita Wrzesińska, ul. Kazimierza Leskiego 24/1, 80-180 Gdańsk';
 
-  function closeMenu(){
-    side.classList.remove('open');
-    document.body.classList.remove('menuOpen');
-    toggle.setAttribute('aria-label','Otwórz menu');
+const pad = n => String(n).padStart(2,'0');
+
+function localISODate(d = new Date()) {
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
+function esc(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, ch => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  }[ch]));
+}
+
+function setMessage(html, cls='') {
+  $('msg').className = 'notice' + (cls ? ' ' + cls : '');
+  $('msg').innerHTML = html;
+}
+
+function dayIndex(dateString) {
+  // JS: Sun=0..Sat=6 -> app/Supabase: Mon=0..Sun=6
+  const d = new Date(dateString + 'T12:00:00');
+  return (d.getDay() + 6) % 7;
+}
+
+
+function normalizeSlotTime(value) {
+  const m = String(value ?? '').match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return '';
+  return String(Number(m[1])).padStart(2,'0') + ':' + m[2];
+}
+
+function timeToMinutes(value) {
+  const m = normalizeSlotTime(value).match(/^(\d{2}):(\d{2})$/);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
+}
+
+function isPastSlot(dateString, timeString) {
+  if (dateString !== localISODate()) return false;
+  const mins = timeToMinutes(timeString);
+  if (!Number.isFinite(mins)) return false;
+  const now = new Date();
+  return mins <= now.getHours() * 60 + now.getMinutes();
+}
+
+function formatDatePL(dateString) {
+  if (!dateString) return '';
+  const d = new Date(dateString + 'T12:00:00');
+  return new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'}).format(d);
+}
+
+function isDayOff(dateString) {
+  return daysOff.find(x => dateString >= x.od && dateString <= x.do);
+}
+
+function getHoursForDate(dateString) {
+  const dow = dayIndex(dateString);
+  return workHours.find(x => Number(x.dzien_tygodnia) === dow && x.aktywne === true);
+}
+
+async function loadClientSettings() {
+  const r = await sb
+    .from('ustawienia')
+    .select('nazwa_terminarza,nazwa_osoby,telefon,email,informacja_dla_klienta')
+    .eq('workspace_id', W)
+    .maybeSingle();
+
+  if (r.error) {
+    console.warn('Nie udało się pobrać ustawień dla klienta:', r.error.message);
+    return false;
   }
-  function openMenu(){
-    side.classList.add('open');
-    document.body.classList.add('menuOpen');
-    toggle.setAttribute('aria-label','Zamknij menu');
-  }
-  toggle.addEventListener('click',function(){
-    if(document.body.classList.contains('menuOpen')) closeMenu();
-    else openMenu();
-  });
 
-  document.querySelectorAll('.sideItem').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      const id=btn.dataset.panel;
-      document.querySelectorAll('.sideItem').forEach(x=>x.classList.toggle('active',x===btn));
-      document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));
-      document.querySelectorAll('.tab').forEach(function(tab){
-        tab.classList.toggle('active',tab.dataset.tab===id);
+  const x = r.data || {};
+  const calendarName = String(x.nazwa_terminarza || '').trim();
+  const owner = String(x.nazwa_osoby || '').trim();
+  const phone = String(x.telefon || '').trim();
+  const email = String(x.email || '').trim();
+  const info = String(x.informacja_dla_klienta || '').trim();
+
+  if (calendarName) {
+    $('calendarName').textContent = calendarName;
+    $('clientSettingsTitle').textContent = calendarName;
+  }
+
+  if (owner) {
+    $('ownerName').textContent = owner;
+    $('clientOwner').textContent = owner;
+  } else {
+    $('ownerName').textContent = 'Wybierz usługę, dzień i wolną godzinę';
+  }
+
+  const contacts = [];
+  if (phone) {
+    const tel = phone.replace(/[^\d+]/g,'');
+    contacts.push('<div>Telefon: <a href="tel:' + esc(tel) + '">' + esc(phone) + '</a></div>');
+  }
+  if (email) {
+    contacts.push('<div>E-mail: <a href="mailto:' + encodeURIComponent(email) + '">' + esc(email) + '</a></div>');
+  }
+
+  $('clientContact').innerHTML = contacts.join('');
+  $('clientInfo').textContent = info;
+  $('clientInfo').classList.toggle('hidden', !info);
+
+  $('clientSettings').classList.toggle('hidden', !(owner || contacts.length || info));
+  return true;
+}
+
+async function loadServices() {
+  const {data,error} = await sb
+    .from('uslugi')
+    .select('id,nazwa,czas_trwania')
+    .eq('workspace_id', W)
+    .eq('aktywna', true)
+    .order('nazwa');
+
+  if (error) {
+    services = [];
+    setMessage('<span class="err">Nie udało się pobrać usług: ' + esc(error.message) + '</span>','err');
+    return false;
+  }
+
+  services = data || [];
+
+  // Nazwy widoczne dla klienta.
+  const wanted = [
+    'masaż ciała',
+    'masaż twarzy',
+    'masaż gorącymi kamieniami',
+    'masaż maseczka/maskalat'
+  ];
+
+  $('service').innerHTML =
+    '<option value="">— wybierz rodzaj wizyty —</option>' +
+    wanted.map(name =>
+      '<option value="' + esc(name) + '">' + esc(name) + '</option>'
+    ).join('');
+
+  return true;
+}
+
+async function loadRules() {
+  const [hoursResult, offResult] = await Promise.all([
+    sb.from('godziny_pracy')
+      .select('dzien_tygodnia,od,do,aktywne')
+      .eq('workspace_id', W),
+    sb.from('dni_wolne')
+      .select('od,do,opis')
+      .eq('workspace_id', W)
+      .order('od')
+  ]);
+
+  if (hoursResult.error) {
+    setMessage('<span class="err">Nie udało się pobrać godzin pracy: ' + esc(hoursResult.error.message) + '</span>','err');
+    return false;
+  }
+  if (offResult.error) {
+    setMessage('<span class="err">Nie udało się pobrać dni wolnych: ' + esc(offResult.error.message) + '</span>','err');
+    return false;
+  }
+
+  workHours = hoursResult.data || [];
+  daysOff = offResult.data || [];
+  return true;
+}
+
+function renderDayMessage() {
+  const date = $('date').value;
+  const off = isDayOff(date);
+  const hours = getHoursForDate(date);
+
+  if (off) {
+    $('dayInfo').innerHTML = `<span class="warn"><b>Ten dzień jest wolny.</b>${off.opis ? ' — ' + esc(off.opis) : ''}</span>`;
+    return 'off';
+  }
+  if (!hours) {
+    $('dayInfo').innerHTML = '<span class="warn"><b>Tego dnia nie przyjmujemy rezerwacji.</b></span>';
+    return 'closed';
+  }
+  $('dayInfo').textContent = `Godziny pracy: ${String(hours.od).slice(0,5)}–${String(hours.do).slice(0,5)}`;
+  return 'open';
+}
+
+function durationToMinutes(value) {
+  if (value == null || value === '') return NaN;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : NaN;
+  const raw = String(value).trim();
+  const hm = raw.match(/^(\d{1,3}):(\d{2})(?::(\d{2}))?$/);
+  if (hm) return Number(hm[1]) * 60 + Number(hm[2]);
+  const m = raw.match(/(\d+(?:[.,]\d+)?)\s*(?:min|m|minutes?)?/i);
+  if (m) {
+    const n = Number(String(m[1]).replace(',', '.'));
+    return Number.isFinite(n) ? n : NaN;
+  }
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function normalizeServiceName(value) {
+  return String(value ?? '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('pl-PL');
+}
+
+function getDbServiceForSelection(serviceName, duration) {
+  const wantedName = normalizeServiceName(serviceName);
+  const minutes = durationToMinutes(duration);
+  return services.find(s =>
+    normalizeServiceName(s.nazwa) === wantedName &&
+    durationToMinutes(s.czas_trwania) === minutes
+  ) || null;
+}
+
+async function slots() {
+  selected = '';
+  $('book').disabled = true;
+  const date = $('date').value;
+  const serviceName = $('service').value;
+  const duration = Number($('duration').value || 0);
+
+  $('slots').innerHTML = '<div class="empty">Sprawdzam dostępne godziny…</div>';
+  if (!serviceName || !date || !duration) return;
+
+  const state = renderDayMessage();
+  if (state === 'off') {
+    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W wybranym dniu masz urlop / dzień wolny.</div>';
+    return;
+  }
+  if (state === 'closed') {
+    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W tym dniu nie ma ustawionych godzin pracy.</div>';
+    return;
+  }
+
+  loadingSlots = true;
+  try {
+    const {data,error} = await sb.rpc('get_available_slots', {
+      p_workspace_id: W,
+      p_date: date,
+      p_duration: duration
+    });
+
+    if (error) {
+      $('slots').innerHTML = '<div class="empty"><span class="err">Nie udało się pobrać wolnych godzin: ' + esc(error.message) + '</span></div>';
+      return;
+    }
+
+    let list = (data || [])
+      .map(x => typeof x === 'string' ? x : x && x.slot_time)
+      .map(normalizeSlotTime)
+      .filter(Boolean)
+      .filter(t => !isPastSlot(date, t));
+
+    if (!list.length) {
+      $('slots').innerHTML = '<div class="empty"><b>Brak wolnych terminów.</b><br>Wybierz inny dzień lub usługę.</div>';
+      return;
+    }
+
+    $('slots').innerHTML = list.map(x => {
+      const t = typeof x === 'string' ? x : x.slot_time;
+      return `<button type="button" class="slot" data-time="${esc(t)}">${esc(t)}</button>`;
+    }).join('');
+
+    document.querySelectorAll('.slot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.slot').forEach(x => x.classList.remove('selected'));
+        btn.classList.add('selected');
+        selected = btn.dataset.time;
+        updateBookState();
+        setMessage('Wybrany termin: <b>' + esc(formatDatePL(date)) + ' ' + esc(selected) + '</b>. Możesz teraz wysłać rezerwację.');
       });
-      if(window.innerWidth<=900) closeMenu();
-      window.scrollTo({top:0,behavior:'smooth'});
     });
-  });
+  } finally {
+    loadingSlots = false;
+  }
+}
 
-  /* ===== GESTY PRZESUWANIA PALCEM =====
-     Android + iOS: przeciągnięcie od lewej krawędzi otwiera menu,
-     przeciągnięcie w lewo po otwartym menu je zamyka. */
-  document.addEventListener('touchstart',function(e){
-    if(window.innerWidth>900 || !e.touches || e.touches.length!==1) return;
-    const t=e.touches[0];
-    touchStartX=t.clientX; touchStartY=t.clientY; touchX=t.clientX;
-    tracking=false; dragging=false;
-    const open=document.body.classList.contains('menuOpen');
-    if((!open && touchStartX<=EDGE) || open){ tracking=true; }
-  },{passive:true});
 
-  document.addEventListener('touchmove',function(e){
-    if(!tracking || !e.touches || e.touches.length!==1) return;
-    const t=e.touches[0];
-    touchX=t.clientX;
-    const dx=touchX-touchStartX, dy=t.clientY-touchStartY;
-    if(Math.abs(dx)<8 || Math.abs(dx)<Math.abs(dy)*1.15) return;
-    dragging=true;
-    if(Math.abs(dx)>12 && e.cancelable) e.preventDefault();
-  },{passive:false});
+function updateBookState() {
+  $('book').disabled = !(selected && $('rodo').checked);
+}
 
-  document.addEventListener('touchend',function(){
-    if(!tracking) return;
-    const dx=touchX-touchStartX;
-    tracking=false;
-    if(!dragging) return;
-    if(!document.body.classList.contains('menuOpen') && dx>THRESHOLD){ openMenu(); }
-    else if(document.body.classList.contains('menuOpen') && dx<-THRESHOLD){ closeMenu(); }
-    dragging=false;
-  },{passive:true});
 
-  document.addEventListener('touchcancel',function(){tracking=false;dragging=false;},{passive:true});
 
-  /* Klawiatura: Escape zamyka menu. */
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape' && document.body.classList.contains('menuOpen')) closeMenu();
-  });
+async function bookAppointment() {
+  if (loadingSlots) return;
 
-  window.addEventListener('resize',function(){
-    /* Po zmianie orientacji nie zostawiaj menu w nieprawidłowym stanie. */
-    if(window.innerWidth>900) closeMenu();
-  });
+  const client = $('name').value.trim();
+  const date = $('date').value;
+  const time = selected;
+  const masseur = $('masseur').value.trim();
+  const service = $('service').value.trim();
+  const duration = Number($('duration').value || 0);
+  const phone = $('phone').value.trim();
+  const email = $('email').value.trim();
+  const note = $('note').value.trim();
+  const rodoConfirmed = $('rodo').checked;
+  const marketingConsent = $('marketing').checked;
+
+  if (!rodoConfirmed) {
+    setMessage('<span class="err">Aby wysłać rezerwację, zapoznaj się z informacją RODO i zaznacz wymagane pole.</span>','err');
+    return;
+  }
+
+  if (!client || !date || !time || !masseur || !service) {
+    setMessage('<span class="err">Uzupełnij imię i nazwisko, datę, wybierz masażystę, rodzaj wizyty i dostępną godzinę.</span>','err');
+    return;
+  }
+
+  if (!Number.isFinite(duration) || duration <= 0) {
+    setMessage('<span class="err">Wybierz prawidłowy czas trwania wizyty.</span>','err');
+    return;
+  }
+
+  if (!phone || !email) {
+    setMessage('<span class="err">Uzupełnij telefon oraz e-mail.</span>','err');
+    return;
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setMessage('<span class="err">Wpisz prawidłowy adres e-mail.</span>','err');
+    return;
+  }
+
+  if (isPastSlot(date, time)) {
+    setMessage('<span class="err">Wybrana godzina już minęła. Wybierz aktualnie dostępną godzinę.</span>','err');
+    await slots();
+    return;
+  }
+
+  if (isDayOff(date)) {
+    setMessage('<span class="err">Ten dzień jest wolny i nie można zarezerwować wizyty.</span>','err');
+    await slots();
+    return;
+  }
+
+  $('book').disabled = true;
+  setMessage('Wysyłam rezerwację…');
+
+  try {
+    /*
+      Zapis dokładnie tak jak w Admin → Terminarz → Nowa wizyta:
+      bezpośredni INSERT do public.wizyty, następnie zapis zgody RODO.
+    */
+    const reservationId = crypto.randomUUID();
+
+    const payload = {
+      id: reservationId,
+      workspace_id: W,
+      klient: client,
+      data: date,
+      godzina: time.length === 5 ? time + ':00' : time,
+      masazysta: masseur,
+      usluga: service,
+      czas_trwania: duration,
+      telefon: phone,
+      email: email,
+      notatka: note,
+      status: 'oczekuje'
+    };
+
+    const visitResult = await sb.from('wizyty').insert(payload);
+
+    if (visitResult.error) {
+      setMessage('<span class="err">Nie udało się dodać wizyty: ' + esc(visitResult.error.message) + '</span>','err');
+      await slots();
+      return;
+    }
+
+    const rodoResult = await sb.rpc('zapisz_zgode_rodo', {
+      p_rezerwacja_id: reservationId,
+      p_workspace_id: W,
+      p_rodo_wersja: RODO_VERSION,
+      p_marketing_zgoda: marketingConsent
+    });
+
+    if (rodoResult.error) {
+      setMessage('<span class="err">Wizyta została zapisana, ale nie udało się zapisać zgody RODO: ' + esc(rodoResult.error.message) + '</span>','err');
+      await slots();
+      return;
+    }
+
+    const bookedTime = time;
+    setMessage(
+      `<span class="ok"><b>Rezerwacja wizyty została wysłana.</b><br>` +
+      `Termin: ${esc(formatDatePL(date))} ${esc(bookedTime)}.<br>` +
+      `Rezerwację Państwa wizyty potwierdzimy SMS.</span>`,
+      'ok'
+    );
+
+    $('name').value = '';
+    $('phone').value = '';
+    $('email').value = '';
+    $('note').value = '';
+    $('rodo').checked = false;
+    $('marketing').checked = false;
+    $('duration').value = '';
+    selected = '';
+    updateBookState();
+    await slots();
+
+  } catch (err) {
+    setMessage('<span class="err">Błąd dodawania wizyty: ' + esc(err?.message || err) + '</span>','err');
+    $('book').disabled = false;
+  }
+}
+
+$('service').addEventListener('change', () => {
+  slots();
+});
+$('date').addEventListener('change', slots);
+$('duration').addEventListener('change', slots);
+$('book').addEventListener('click', bookAppointment);
+
+
+$('rodo').addEventListener('change', updateBookState);
+$('marketing').addEventListener('change', updateBookState);
+
+$('openRodo').addEventListener('click', () => {
+  $('rodoModal').classList.remove('hidden');
+});
+
+$('closeRodo').addEventListener('click', () => {
+  $('rodoModal').classList.add('hidden');
+});
+
+$('rodoModal').addEventListener('click', e => {
+  if (e.target === $('rodoModal')) $('rodoModal').classList.add('hidden');
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') $('rodoModal').classList.add('hidden');
+});
+
+(async function init(){
+  const t = localISODate();
+  $('date').min = t;
+  $('date').value = t;
+  updateBookState();
+  setMessage('Łączenie z bazą online…');
+
+  const okSettings = await loadClientSettings();
+  const okServices = await loadServices();
+  const okRules = await loadRules();
+  if (!okServices || !okRules) return;
+
+  await slots();
 })();
-const cfg=window.TERM_CONFIG||{};const sb=supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY);const WORKSPACE=cfg.WORKSPACE_ID;
-const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0');
-const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
-const plDate=s=>new Intl.DateTimeFormat('pl-PL',{dateStyle:'full'}).format(new Date(s+'T12:00:00'));
-const shortDate=s=>new Intl.DateTimeFormat('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(s+'T12:00:00'));
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const initialAuthHash=window.location.hash||'';
-const initialAuthSearch=window.location.search||'';
-/* Supabase może użyć starszego linku z #type=recovery albo nowszego
-   linku PKCE z ?code=... . Oba traktujemy jako tryb odzyskiwania. */
-const isRecoveryLink=/(?:^|[&#?])type(?:%3D|=)recovery(?:[&#]|$)/i.test(initialAuthHash+'\n'+initialAuthSearch)
-  ||/(?:^|[?&])code=[^&]+/i.test(initialAuthSearch)
-  ||/(?:^|[&#])access_token=[^&#]+/i.test(initialAuthHash);
-let view=new Date(),selected=new Date(),rows=[],services=[],hours=[],daysOff=[],editingServiceId=null,rodoRows=[],rodoLoaded=false,usersRows=[],activityTimer=null,recoveryMode=isRecoveryLink,recoveryPanelShown=false;
-const NEW_VISIT_RODO_VERSION='1.0';
-const days=['Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota','Niedziela'];
-document.querySelectorAll('.tab').forEach(b=>b.onclick=async()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  $(b.dataset.tab).classList.add('active');
-  if(b.dataset.tab==='rodoPanel'&&!rodoLoaded) await loadRodo();
-  if(b.dataset.tab==='settingsPanel') await loadAdminPanel();
-});
-function statusClass(s){return s==='oczekuje'?'pending':s==='odrzucona'?'rejected':'confirmed'}
-function statusLabel(s){return s==='oczekuje'?'oczekuje':s==='odrzucona'?'odrzucona':'potwierdzona'}
-function showMsg(id,text,err=false){$(id).textContent=text;$(id).className='help'+(err?' err':'')}
-function dayIndex(s){return (new Date(s+'T12:00:00').getDay()+6)%7}
-function isOff(s){return daysOff.find(x=>s>=x.od&&s<=x.do)}
-function showRecoveryPanel(){
-  recoveryMode=true;
-  $('login').classList.add('hidden');
-  $('app').classList.add('hidden');
-  $('logout').classList.add('hidden');
-  $('recoveryPanel').classList.remove('hidden');
-  if(!recoveryPanelShown){
-    $('recoveryPassword').value='';
-    $('recoveryPassword2').value='';
-    showMsg('recoveryMsg','');
-    recoveryPanelShown=true;
-  }
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js").catch(function(){}); });
 }
-
-async function hideRecoveryPanel(){
-  recoveryMode=false;
-  recoveryPanelShown=false;
-  $('recoveryPanel').classList.add('hidden');
-  $('login').classList.remove('hidden');
-  $('app').classList.add('hidden');
-  $('logout').classList.add('hidden');
-}
-
-async function registerActivity(){
-  const {data}=await sb.auth.getSession();
-  if(!data?.session?.user) return;
-  const r=await sb.rpc('rejestruj_aktywnosc_uzytkownika',{p_workspace_id:WORKSPACE});
-  if(r.error) console.warn('Nie udało się zapisać aktywności użytkownika:',r.error.message);
-}
-
-function startActivityHeartbeat(){
-  if(activityTimer) clearInterval(activityTimer);
-  registerActivity();
-  activityTimer=setInterval(registerActivity,60000);
-}
-
-function stopActivityHeartbeat(){
-  if(activityTimer){clearInterval(activityTimer);activityTimer=null;}
-}
-
-function fmtDateTime(v){
-  if(!v) return '—';
-  const d=new Date(v);
-  if(Number.isNaN(d.getTime())) return '—';
-  return new Intl.DateTimeFormat('pl-PL',{dateStyle:'short',timeStyle:'short'}).format(d);
-}
-function fmtDate(v){
-  if(!v) return '—';
-  const d=new Date(v);
-  if(Number.isNaN(d.getTime())) return '—';
-  return new Intl.DateTimeFormat('pl-PL',{dateStyle:'short'}).format(d);
-}
-function renderUsers(){
-  const all=Array.isArray(usersRows)?usersRows:[];
-  const admins=all.filter(x=>x.is_admin);
-  $('usersTotal').textContent=all.length;
-  $('usersOnline').textContent=all.filter(x=>x.is_online).length;
-  $('usersAdmins').textContent=admins.length;
-  $('usersTable').innerHTML=all.length?all.map(x=>`<tr><td><span class="userEmail">${esc(x.email||'—')}</span></td><td><span class="onlineBadge ${x.is_online?'online':'offline'}">${x.is_online?'🟢 Aktywny':'⚪ Nieaktywny'}</span></td><td>${x.is_admin?'<span class="adminMini">Administrator</span>':'<span class="userMini">Użytkownik</span>'}</td><td>${esc(fmtDate(x.created_at))}</td><td>${esc(fmtDateTime(x.last_sign_in_at))}</td><td>${esc(fmtDateTime(x.last_seen_at))}</td></tr>`).join(''):'<tr><td colspan="6" class="usersEmpty">Brak użytkowników do wyświetlenia.</td></tr>';
-  $('adminsTable').innerHTML=admins.length?admins.map(x=>`<tr><td><span class="userEmail">${esc(x.email||'—')}</span></td><td><span class="onlineBadge ${x.is_online?'online':'offline'}">${x.is_online?'🟢 Aktywny':'⚪ Nieaktywny'}</span></td><td>${esc(fmtDate(x.created_at))}</td><td>${esc(fmtDateTime(x.last_sign_in_at))}</td><td>${esc(fmtDateTime(x.last_seen_at))}</td></tr>`).join(''):'<tr><td colspan="5" class="usersEmpty">Brak administratorów.</td></tr>';
-}
-
-async function loadUsersAdmin(){
-  $('usersAdminArea').classList.add('hidden');
-  $('adminsListArea').classList.add('hidden');
-  $('usersTable').innerHTML='<tr><td colspan="6" class="usersEmpty">Ładowanie listy użytkowników…</td></tr>';
-  $('adminsTable').innerHTML='<tr><td colspan="5" class="usersEmpty">Ładowanie listy administratorów…</td></tr>';
-  showMsg('usersMsg','Ładowanie listy użytkowników…');
-  showMsg('adminsMsg','');
-  try{
-    const r=await sb.rpc('pobierz_uzytkownikow_admin',{p_workspace_id:WORKSPACE});
-    if(r.error) throw r.error;
-    usersRows=Array.isArray(r.data)?r.data:[];
-    renderUsers();
-    $('usersAdminArea').classList.remove('hidden');
-    $('adminsListArea').classList.remove('hidden');
-    showMsg('usersMsg','Lista użytkowników została pobrana bezpiecznie.');
-  }catch(e){
-    usersRows=[];
-    $('usersTable').innerHTML='<tr><td colspan="6" class="usersEmpty">Brak danych.</td></tr>';
-    $('adminsTable').innerHTML='<tr><td colspan="5" class="usersEmpty">Brak danych.</td></tr>';
-    showMsg('usersMsg','Nie udało się pobrać listy użytkowników: '+(e?.message||e),true);
-  }
-}
-
-async function logged(){
-  const {data}=await sb.auth.getSession();
-  const user=data?.session?.user;
-  if(recoveryMode) return;
-  if(user){
-    $('login').classList.add('hidden');
-    $('recoveryPanel').classList.add('hidden');
-    $('app').classList.remove('hidden');
-    $('logout').classList.remove('hidden');
-    startActivityHeartbeat();
-    await refreshAll();
-    await loadAdminPanel();
-  }else{
-    stopActivityHeartbeat();
-    $('login').classList.remove('hidden');
-    $('recoveryPanel').classList.add('hidden');
-    $('app').classList.add('hidden');
-    $('logout').classList.add('hidden');
-  }
-}
-
-async function loadAdminPanel(){
-  const {data}=await sb.auth.getSession();
-  const user=data?.session?.user;
-  if(!user){return}
-  const email=user.email||'—';
-  $('adminCurrentEmail').textContent=email;
-  $('adminMsg').textContent='';
-  const grantBtn=$('adminGrantBtn'),revokeBtn=$('adminRevokeBtn');
-  let isAdmin=false;
-  grantBtn.disabled=true;
-  revokeBtn.disabled=true;
-  $('adminCurrentRole').className='adminRole user';
-  $('adminCurrentRole').textContent='Sprawdzanie roli…';
-  try{
-    const r=await sb.rpc('czy_uzytkownik_jest_adminem',{p_user_id:user.id,p_workspace_id:WORKSPACE});
-    if(r.error) throw r.error;
-    isAdmin=!!r.data;
-    $('adminCurrentRole').className='adminRole '+(isAdmin?'admin':'user');
-    $('adminCurrentRole').textContent=isAdmin?'Administrator':'Użytkownik';
-    grantBtn.disabled=!isAdmin;
-    revokeBtn.disabled=!isAdmin;
-    if(!isAdmin){
-      $('adminMsg').textContent='Tylko administrator może nadawać i odbierać uprawnienia.';
-      $('usersAdminArea').classList.add('hidden');
-      $('adminsListArea').classList.add('hidden');
-      return;
-    }
-    await loadUsersAdmin();
-  }catch(e){
-    $('adminCurrentRole').className='adminRole user';
-    $('adminCurrentRole').textContent='Nie udało się sprawdzić';
-    $('adminMsg').textContent='Nie udało się sprawdzić uprawnień: '+(e?.message||e);
-    $('usersAdminArea').classList.add('hidden');
-    $('adminsListArea').classList.add('hidden');
-  }
-
-  async function adminAction(action){
-    const target=$('adminTargetEmail').value.trim().toLowerCase();
-    if(!target){showMsg('adminMsg','Wpisz e-mail użytkownika.',true);return}
-    if(!target.includes('@')){showMsg('adminMsg','Wpisz poprawny adres e-mail.',true);return}
-    grantBtn.disabled=true;revokeBtn.disabled=true;
-    showMsg('adminMsg',action==='grant'?'Nadawanie uprawnień…':'Odbieranie uprawnień…');
-    try{
-      const fn=action==='grant'?'nadaj_admina_email':'odbierz_admina_email';
-      const r=await sb.rpc(fn,{p_email:target,p_workspace_id:WORKSPACE});
-      if(r.error) throw r.error;
-      showMsg('adminMsg',action==='grant'?'Administrator został nadany dla: '+target:'Uprawnienia administratora zostały odebrane dla: '+target);
-      if(target===email.toLowerCase()){
-        setTimeout(loadAdminPanel,250);
-      }else{
-        grantBtn.disabled=false;revokeBtn.disabled=false;
-        await loadUsersAdmin();
-      }
-    }catch(e){
-      showMsg('adminMsg','Operacja nie została wykonana: '+(e?.message||e),true);
-      grantBtn.disabled=!isAdmin;
-      revokeBtn.disabled=!isAdmin;
-    }
-  }
-  grantBtn.onclick=()=>adminAction('grant');
-  revokeBtn.onclick=()=>{
-    if(!confirm('Czy na pewno odebrać uprawnienia administratora temu użytkownikowi?')) return;
-    adminAction('revoke');
-  };
-}
-
-async function refreshAll(){await Promise.all([loadVisits(),loadServices(),loadHours(),loadOff(),loadSettings()]);renderCalendar();renderDayList();renderVisitsTable();renderServices();renderHours();renderOff()}
-async function loadVisits(){const r=await sb.from('wizyty').select('*').eq('workspace_id',WORKSPACE).order('data').order('godzina');if(r.error){$('sync').textContent='Błąd wizyt: '+r.error.message;return}rows=r.data||[]}
-async function loadServices(){const r=await sb.from('uslugi').select('id,nazwa,czas_trwania,aktywna').eq('workspace_id',WORKSPACE).order('nazwa');if(!r.error)services=r.data||[]}
-async function loadHours(){const r=await sb.from('godziny_pracy').select('id,dzien_tygodnia,od,do,aktywne').eq('workspace_id',WORKSPACE).order('dzien_tygodnia');if(!r.error)hours=r.data||[]}
-async function loadOff(){const r=await sb.from('dni_wolne').select('id,od,do,opis').eq('workspace_id',WORKSPACE).order('od');if(!r.error)daysOff=r.data||[]}
-function renderCalendar(){const y=view.getFullYear(),m=view.getMonth(),first=new Date(y,m,1),start=(first.getDay()+6)%7,daysIn=new Date(y,m+1,0).getDate(),c=$('calendar');c.innerHTML='';$('title').textContent=new Intl.DateTimeFormat('pl-PL',{month:'long',year:'numeric'}).format(first);['Pn','Wt','Śr','Cz','Pt','Sb','Nd'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;c.appendChild(e)});for(let i=0;i<42;i++){const n=i-start+1,d=new Date(y,m,n),s=iso(d),e=document.createElement('div');e.className='day'+(n<1||n>daysIn?' muted':'')+(s===iso(new Date())?' today':'')+(s===iso(selected)?' sel':'');if(isOff(s))e.classList.add('dayOff');const a=rows.filter(x=>x.data===s);if(a.length)e.classList.add('has');e.innerHTML='<div class="num">'+d.getDate()+'</div>'+a.slice(0,3).map(x=>'<div class="appt '+statusClass(x.status)+'">'+esc((x.godzina||'').slice(0,5))+' '+esc(x.klient)+(x.masazysta?' · '+esc(x.masazysta):'')+'</div>').join('');e.onclick=()=>{if(n>=1&&n<=daysIn){selected=d;$('date').value=s;renderCalendar();renderDayList();loadAvailableTimes()}};c.appendChild(e)}}
-function actionButtons(x){const id=x.id,s=x.status||'potwierdzona';let h='<button class="smallBtn" data-action="delete" data-id="'+id+'">Usuń</button>';if(s==='oczekuje')h='<button class="smallBtn" data-action="confirm" data-id="'+id+'">Potwierdź</button><button class="smallBtn" data-action="reject" data-id="'+id+'">Odrzuć</button>'+h;else if(s==='potwierdzona')h='<button class="smallBtn" data-action="reject" data-id="'+id+'">Odrzuć</button>'+h;else h='<button class="smallBtn" data-action="confirm" data-id="'+id+'">Potwierdź</button>'+h;return h}
-function bindActions(root){root.querySelectorAll('[data-action]').forEach(b=>b.onclick=async()=>{const id=b.dataset.id,a=b.dataset.action;if(a==='delete'){if(!confirm('Usunąć tę wizytę?'))return;const r=await sb.from('wizyty').delete().eq('id',id);if(r.error)alert(r.error.message);else await refreshAll();return}const ns=a==='confirm'?'potwierdzona':'odrzucona';if(!confirm(ns==='potwierdzona'?'Potwierdzić tę wizytę?':'Odrzucić tę wizytę?'))return;const r=await sb.from('wizyty').update({status:ns}).eq('id',id);if(r.error)alert(r.error.message);else await refreshAll()})}
-function renderDayList(){const s=iso(selected),a=rows.filter(x=>x.data===s).sort((x,y)=>(x.godzina||'').localeCompare(y.godzina||''));$('selectedLabel').textContent=plDate(s);$('count').textContent=a.length?a.length+' '+(a.length===1?'wizyta':'wizyty'):'';$('dayList').innerHTML=a.length?a.map(x=>'<div class="item" style="border-top:1px solid #e4dac7;padding:11px 0"><b>'+esc((x.godzina||'').slice(0,5))+' — '+esc(x.klient)+'</b> <span class="muted">('+esc(x.czas_trwania??x.duration??x.czas??60)+' min)</span><div>'+esc(x.usluga||'Wizyta')+(x.masazysta?' · Masażysta: '+esc(x.masazysta):'')+(x.telefon?' · '+esc(x.telefon):'')+'</div>'+(x.email?'<div class="muted">E-mail: <a href="mailto:'+encodeURIComponent(x.email)+'">'+esc(x.email)+'</a></div>':'')+'<div style="margin-top:5px"><span class="statusBadge '+statusClass(x.status)+'">'+statusLabel(x.status)+'</span></div>'+(x.notatka?'<div class="muted" style="margin-top:5px">'+esc(x.notatka)+'</div>':'')+'<div class="actions">'+actionButtons(x)+'</div></div>').join(''):'<div class="empty">Brak wizyt na ten dzień.</div>';bindActions($('dayList'))}
-function renderVisitsTable(){let a=[...rows];const q=$('visitSearch').value.trim().toLowerCase(),st=$('visitStatus').value,from=$('visitFrom').value,to=$('visitTo').value;if(q)a=a.filter(x=>[x.klient,x.telefon,x.email].some(v=>String(v||'').toLowerCase().includes(q)));if(st)a=a.filter(x=>(x.status||'potwierdzona')===st);if(from)a=a.filter(x=>x.data>=from);if(to)a=a.filter(x=>x.data<=to);a.sort((x,y)=>(x.data+x.godzina).localeCompare(y.data+y.godzina));$('allCount').textContent=a.length+' '+(a.length===1?'wizyta':'wizyt');$('visitsTable').innerHTML=a.length?a.map(x=>'<tr><td>'+shortDate(x.data)+'</td><td>'+esc((x.godzina||'').slice(0,5))+'</td><td><b>'+esc(x.klient)+'</b></td><td>'+esc(x.masazysta||'')+'</td><td>'+esc(x.usluga||'Wizyta')+'<br><span class="muted">'+esc(x.czas_trwania??x.duration??x.czas??60)+' min</span></td><td>'+esc(x.telefon||'')+(x.email?'<br>'+esc(x.email):'')+'</td><td><span class="statusBadge '+statusClass(x.status)+'">'+statusLabel(x.status)+'</span></td><td><div class="actions" style="margin:0">'+actionButtons(x)+'</div></td></tr>').join(''):'<tr><td colspan="8" class="empty">Brak wizyt spełniających kryteria.</td></tr>';bindActions($('visitsTable'))}
-function renderServices(){const l=$('servicesList');l.innerHTML=services.length?services.map(s=>'<div class="serviceRow"><div><b>'+esc(s.nazwa)+'</b></div><div>'+esc(s.czas_trwania)+' min</div><div><span class="statusBadge '+(s.aktywna?'confirmed':'rejected')+'">'+(s.aktywna?'aktywna':'nieaktywna')+'</span></div><div class="actions" style="margin:0"><button class="smallBtn" data-service-edit="'+s.id+'">Edytuj</button><button class="smallBtn danger" data-service-delete="'+s.id+'">Usuń</button></div></div>').join(''):'<div class="empty">Brak usług.</div>';l.querySelectorAll('[data-service-edit]').forEach(b=>b.onclick=()=>{const s=services.find(x=>String(x.id)===b.dataset.serviceEdit);if(!s)return;editingServiceId=s.id;$('serviceName').value=s.nazwa;$('serviceMinutes').value=s.czas_trwania;$('serviceActive').checked=!!s.aktywna;$('serviceSaveBtn').textContent='Zapisz zmiany';$('serviceCancel').classList.remove('hidden')});l.querySelectorAll('[data-service-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Usunąć tę usługę?'))return;const r=await sb.from('uslugi').delete().eq('id',b.dataset.serviceDelete).eq('workspace_id',WORKSPACE);if(r.error)showMsg('serviceMsg',r.error.message,true);else{showMsg('serviceMsg','Usługa usunięta.');await loadServices();renderServices()}})}
-
-/* ===== NAPRAWA: USŁUGI — DODAWANIE / EDYCJA / USUWANIE ===== */
-function resetServiceForm(){
-  editingServiceId=null;
-  $('serviceForm').reset();
-  $('serviceMinutes').value='30';
-  $('serviceActive').checked=true;
-  $('serviceSaveBtn').textContent='Dodaj usługę';
-  $('serviceCancel').classList.add('hidden');
-}
-
-$('serviceForm').onsubmit=async function(e){
-  e.preventDefault();
-
-  const name=$('serviceName').value.trim();
-  const minutes=Number($('serviceMinutes').value);
-  const active=$('serviceActive').checked;
-
-  if(!name){
-    showMsg('serviceMsg','Wpisz nazwę usługi.',true);
-    return;
-  }
-  if(!Number.isFinite(minutes) || minutes<5 || minutes%5!==0){
-    showMsg('serviceMsg','Czas trwania musi być liczbą całkowitą co najmniej 5 minut, w odstępach co 5 minut.',true);
-    return;
-  }
-
-  const btn=$('serviceSaveBtn');
-  btn.disabled=true;
-  showMsg('serviceMsg',editingServiceId?'Zapisywanie zmian…':'Dodawanie usługi…');
-
-  try{
-    let r;
-
-    if(editingServiceId){
-      r=await sb.from('uslugi')
-        .update({
-          nazwa:name,
-          czas_trwania:minutes,
-          aktywna:active
-        })
-        .eq('id',editingServiceId)
-        .eq('workspace_id',WORKSPACE);
-    }else{
-      r=await sb.from('uslugi')
-        .insert({
-          workspace_id:WORKSPACE,
-          nazwa:name,
-          czas_trwania:minutes,
-          aktywna:active
-        });
-    }
-
-    if(r.error) throw r.error;
-
-    showMsg('serviceMsg',editingServiceId?'Usługa została zaktualizowana.':'Usługa została dodana.');
-    resetServiceForm();
-    await loadServices();
-    renderServices();
-  }catch(err){
-    showMsg('serviceMsg','Nie udało się zapisać usługi: '+(err?.message||err),true);
-  }finally{
-    btn.disabled=false;
-  }
-};
-
-$('serviceCancel').onclick=function(){
-  resetServiceForm();
-  showMsg('serviceMsg','Edycja anulowana.');
-};
-
-$('saveHours').onclick=async()=>{
-  const btn=$('saveHours');
-  const rowsToSave=[];
-  for(let i=0;i<7;i++){
-    const from=$('hoursList').querySelector('[data-hour-from=\"'+i+'\"]').value;
-    const to=$('hoursList').querySelector('[data-hour-to=\"'+i+'\"]').value;
-    const active=$('hoursList').querySelector('[data-hour-active=\"'+i+'\"]').checked;
-    if(active && (!from || !to)){
-      showMsg('hoursMsg','Uzupełnij godzinę od i do dla '+days[i]+'.',true);
-      return;
-    }
-    if(active && from>=to){
-      showMsg('hoursMsg','Godzina „Do” musi być późniejsza niż „Od” dla '+days[i]+'.',true);
-      return;
-    }
-    rowsToSave.push({dzien_tygodnia:i,od:from||'09:00',do:to||'17:00',aktywne:active});
-  }
-  btn.disabled=true;
-  showMsg('hoursMsg','Zapisywanie godzin pracy…');
-  try{
-    for(const item of rowsToSave){
-      const existing=hours.find(h=>Number(h.dzien_tygodnia)===item.dzien_tygodnia);
-      let r;
-      if(existing){
-        r=await sb.from('godziny_pracy').update({od:item.od,do:item.do,aktywne:item.aktywne})
-          .eq('id',existing.id).eq('workspace_id',WORKSPACE);
-      }else{
-        r=await sb.from('godziny_pracy').insert({workspace_id:WORKSPACE,...item});
-      }
-      if(r.error) throw r.error;
-    }
-    await loadHours();
-    renderHours();
-    showMsg('hoursMsg','Godziny pracy zostały zapisane.');
-  }catch(e){
-    showMsg('hoursMsg','Nie udało się zapisać godzin pracy: '+(e?.message||e),true);
-  }finally{btn.disabled=false;}
-};
-
-function renderHours(){const defaults=[...Array(7)].map((_,i)=>hours.find(h=>Number(h.dzien_tygodnia)===i)||{dzien_tygodnia:i,od:'09:00',do:'17:00',aktywne:false});$('hoursList').innerHTML=defaults.map((h,i)=>'<div class="hourRow"><b>'+days[i]+'</b><input type="time" data-hour-from="'+i+'" value="'+esc((h.od||'').slice(0,5))+'"><input type="time" data-hour-to="'+i+'" value="'+esc((h.do||'').slice(0,5))+'"><label class="toggle"><input type="checkbox" data-hour-active="'+i+'" '+(h.aktywne?'checked':'')+'> Aktywny</label></div>').join('')}
-$('offForm').onsubmit=async function(e){
-  e.preventDefault();
-  const from=$('offFrom').value;
-  const to=$('offTo').value;
-  const desc=$('offDesc').value.trim();
-  if(!from||!to){showMsg('offMsg','Wybierz datę od i do.',true);return}
-  if(to<from){showMsg('offMsg','Data „Do” nie może być wcześniejsza niż data „Od”.',true);return}
-  const btn=this.querySelector('button[type=submit],button:not([type])');
-  if(btn)btn.disabled=true;
-  try{
-    const r=await sb.from('dni_wolne').insert({
-      workspace_id:WORKSPACE,
-      od:from,
-      do:to,
-      opis:desc||'Dzień wolny'
-    });
-    if(r.error)throw r.error;
-    showMsg('offMsg','Dzień wolny został zapisany.');
-    $('offFrom').value='';
-    $('offTo').value='';
-    $('offDesc').value='';
-    await loadOff();
-    renderOff();
-    renderCalendar();
-  }catch(err){
-    showMsg('offMsg','Nie udało się zapisać dnia wolnego: '+(err?.message||err),true);
-  }finally{
-    if(btn)btn.disabled=false;
-  }
-};
-
-function renderOff(){const l=$('offList');l.innerHTML=daysOff.length?daysOff.map(x=>'<div class="offRow"><div><b>'+shortDate(x.od)+'</b></div><div><b>'+shortDate(x.do)+'</b></div><div>'+esc(x.opis||'Dzień wolny')+'</div><div class="actions" style="margin:0"><button class="smallBtn danger" data-off-delete="'+x.id+'">Usuń</button></div></div>').join(''):'<div class="empty">Brak ustawionych dni wolnych.</div>';l.querySelectorAll('[data-off-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Usunąć ten okres wolny?'))return;const r=await sb.from('dni_wolne').delete().eq('id',b.dataset.offDelete).eq('workspace_id',WORKSPACE);if(r.error)showMsg('offMsg',r.error.message,true);else{showMsg('offMsg','Okres usunięty.');await loadOff();renderOff();renderCalendar()}})}
-
-/* ===== RODO ADMIN — bezpośredni odczyt tabeli ZABRONIONY.
-   Panel korzysta wyłącznie z funkcji pobierz_zgody_rodo_admin. ===== */
-function rodoValue(x,names){
-  for(const n of names){
-    if(x && x[n]!==undefined && x[n]!==null) return x[n];
-  }
-  return null;
-}
-function rodoBool(v){ return v===true || v==='true' || v===1 || v==='1'; }
-function rodoDateTime(v){
-  if(!v) return '—';
-  try{return new Intl.DateTimeFormat('pl-PL',{dateStyle:'short',timeStyle:'short'}).format(new Date(v));}
-  catch(e){return String(v)}
-}
-function rodoDateOnly(v){
-  if(!v) return '';
-  const s=String(v);
-  return s.length>=10?s.slice(0,10):s;
-}
-function rodoId(x){
-  return rodoValue(x,['id','zgoda_id','consent_id','rodo_id']);
-}
-function hideRodoDetail(){
-  $('rodoDetail').classList.add('hidden');
-  $('rodoDetail').innerHTML='';
-}
-function clearRodoSelection(){
-  hideRodoDetail();
-  document.querySelectorAll('#rodoTable tr.rodoSelected').forEach(tr=>tr.classList.remove('rodoSelected'));
-}
-function rodoEditRow(x, i){
-  const klient=rodoValue(x,['klient_imie_nazwisko','klient','imie_nazwisko'])||'';
-  const tel=rodoValue(x,['klient_telefon','telefon'])||'';
-  const email=rodoValue(x,['klient_email','email'])||'';
-  const rg=rodoBool(rodoValue(x,['rodo_potwierdzone','rodoPotwierdzone']));
-  const mg=rodoBool(rodoValue(x,['marketing_zgoda','marketingZgoda']));
-  const rv=rodoValue(x,['rodo_wersja','rodoWersja'])||'';
-  return '<tr class="rodoEditRow" data-rodo-edit-index="'+i+'">'+
-    '<td>'+esc(rodoDateTime(rodoValue(x,['rodo_data','created_at','createdAt'])))+'</td>'+
-    '<td><input data-edit="klient" value="'+esc(klient)+'" aria-label="Klient"></td>'+
-    '<td><input data-edit="telefon" value="'+esc(tel)+'" aria-label="Telefon"></td>'+
-    '<td><input type="email" data-edit="email" value="'+esc(email)+'" aria-label="E-mail"></td>'+
-    '<td><select data-edit="rodo" aria-label="RODO"><option value="1" '+(rg?'selected':'')+'>TAK</option><option value="0" '+(!rg?'selected':'')+'>NIE</option></select></td>'+
-    '<td><input class="rodoReadonly" readonly value="'+esc(rv)+'" aria-label="Wersja RODO"></td>'+
-    '<td><select data-edit="marketing" aria-label="Marketing"><option value="1" '+(mg?'selected':'')+'>TAK</option><option value="0" '+(!mg?'selected':'')+'>NIE</option></select></td>'+
-    '<td>—</td>'+
-    '<td><div class="rodoActions"><button type="button" class="rodoAction save" title="Zapisz zmiany" aria-label="Zapisz zmiany" data-rodo-save="'+i+'">✓</button><button type="button" class="rodoAction cancel" title="Anuluj edycję" aria-label="Anuluj edycję" data-rodo-cancel="'+i+'">×</button></div></td>'+
-    '</tr>';
-}
-function renderRodo(){
-  const all=Array.isArray(rodoRows)?rodoRows:[];
-  const q=$('rodoSearch').value.trim().toLowerCase();
-  const from=$('rodoFrom').value;
-  const to=$('rodoTo').value;
-
-  let a=all.filter(x=>{
-    const klient=String(rodoValue(x,['klient_imie_nazwisko','klient','imie_nazwisko'])||'');
-    const tel=String(rodoValue(x,['klient_telefon','telefon'])||'');
-    const email=String(rodoValue(x,['klient_email','email'])||'');
-    if(q && ![klient,tel,email].some(v=>v.toLowerCase().includes(q))) return false;
-    const dt=rodoValue(x,['rodo_data','created_at','createdAt']);
-    const day=rodoDateOnly(dt);
-    if(from && day<from) return false;
-    if(to && day>to) return false;
-    return true;
-  });
-
-  a.sort((x,y)=>{
-    const dx=String(rodoValue(x,['rodo_data','created_at','createdAt'])||'');
-    const dy=String(rodoValue(y,['rodo_data','created_at','createdAt'])||'');
-    return dy.localeCompare(dx);
-  });
-
-  const total=all.length;
-  const confirmed=all.filter(x=>rodoBool(rodoValue(x,['rodo_potwierdzone','rodoPotwierdzone']))).length;
-  const marketing=all.filter(x=>rodoBool(rodoValue(x,['marketing_zgoda','marketingZgoda']))).length;
-  $('rodoTotal').textContent=total;
-  $('rodoConfirmed').textContent=confirmed;
-  $('rodoMarketing').textContent=marketing;
-  $('rodoCount').textContent=a.length+' '+(a.length===1?'zgoda':'zgód');
-
-  $('rodoTable').innerHTML=a.length?a.map((x,i)=>{
-    const klient=rodoValue(x,['klient_imie_nazwisko','klient','imie_nazwisko'])||'—';
-    const tel=rodoValue(x,['klient_telefon','telefon'])||'—';
-    const email=rodoValue(x,['klient_email','email'])||'—';
-    const rd=rodoValue(x,['rodo_data','created_at','createdAt']);
-    const rv=rodoValue(x,['rodo_wersja','rodoWersja'])||'—';
-    const rg=rodoBool(rodoValue(x,['rodo_potwierdzone','rodoPotwierdzone']));
-    const mg=rodoBool(rodoValue(x,['marketing_zgoda','marketingZgoda']));
-    const md=rodoValue(x,['marketing_data','marketingData']);
-    return '<tr data-rodo-index="'+i+'">'+
-      '<td>'+esc(rodoDateTime(rd))+'</td>'+
-      '<td><b>'+esc(klient)+'</b></td>'+
-      '<td>'+esc(tel)+'</td>'+
-      '<td>'+esc(email)+'</td>'+
-      '<td class="'+(rg?'rodoYes':'rodoNo')+'">'+(rg?'TAK':'NIE')+'</td>'+
-      '<td>'+esc(rv)+'</td>'+
-      '<td class="'+(mg?'rodoYes':'rodoNo')+'">'+(mg?'TAK':'NIE')+'</td>'+
-      '<td>'+esc(rodoDateTime(md))+'</td>'+
-      '<td><div class="rodoActions">'+
-        '<button type="button" class="rodoAction edit" title="Edytuj" aria-label="Edytuj" data-rodo-edit="'+i+'">✎</button>'+
-        '<button type="button" class="rodoAction delete" title="Usuń" aria-label="Usuń" data-rodo-delete="'+i+'">×</button>'+
-      '</div></td>'+
-      '</tr>';
-  }).join(''):'<tr><td colspan="9" class="empty">Brak zgód spełniających kryteria.</td></tr>';
-
-  clearRodoSelection();
-
-  $('rodoTable').querySelectorAll('[data-rodo-index]').forEach(tr=>{
-    tr.onclick=(ev)=>{
-      if(ev.target.closest('[data-rodo-edit],[data-rodo-delete]')) return;
-      const x=a[Number(tr.dataset.rodoIndex)];
-      if(!x)return;
-      const wasSelected=tr.classList.contains('rodoSelected');
-      if(wasSelected){
-        clearRodoSelection();
-        return;
-      }
-      $('rodoTable').querySelectorAll('tr.rodoSelected').forEach(r=>r.classList.remove('rodoSelected'));
-      tr.classList.add('rodoSelected');
-      const klient=rodoValue(x,['klient_imie_nazwisko','klient','imie_nazwisko'])||'—';
-      const tel=rodoValue(x,['klient_telefon','telefon'])||'—';
-      const email=rodoValue(x,['klient_email','email'])||'—';
-      const rid=rodoValue(x,['rezerwacja_id','rezerwacjaId','reservation_id'])||'—';
-      const wid=rodoValue(x,['workspace_id','workspaceId'])||WORKSPACE;
-      const rd=rodoValue(x,['rodo_data','created_at','createdAt']);
-      const rv=rodoValue(x,['rodo_wersja','rodoWersja'])||'—';
-      const rg=rodoBool(rodoValue(x,['rodo_potwierdzone','rodoPotwierdzone']));
-      const mg=rodoBool(rodoValue(x,['marketing_zgoda','marketingZgoda']));
-      const md=rodoValue(x,['marketing_data','marketingData']);
-      const mv=rodoValue(x,['marketing_wersja','marketingWersja'])||'—';
-      $('rodoDetail').classList.remove('hidden');
-      $('rodoDetail').innerHTML='<b>Szczegóły zgody</b>'+
-        '<div class="rodoDetailGrid" style="margin-top:7px">'+
-        '<div><b>Klient:</b> '+esc(klient)+'</div><div><b>Telefon:</b> '+esc(tel)+'</div>'+
-        '<div><b>E-mail:</b> '+esc(email)+'</div><div><b>Rezerwacja ID:</b> '+esc(rid)+'</div>'+
-        '<div><b>RODO potwierdzone:</b> '+(rg?'TAK':'NIE')+'</div><div><b>Data RODO:</b> '+esc(rodoDateTime(rd))+'</div>'+
-        '<div><b>Wersja RODO:</b> '+esc(rv)+'</div><div><b>Marketing:</b> '+(mg?'TAK':'NIE')+'</div>'+
-        '<div><b>Data marketingu:</b> '+esc(rodoDateTime(md))+'</div><div><b>Wersja marketingu:</b> '+esc(mv)+'</div>'+
-        '<div><b>Workspace:</b> '+esc(wid)+'</div></div>';
-    };
-  });
-
-  $('rodoTable').querySelectorAll('[data-rodo-edit]').forEach(b=>b.onclick=(ev)=>{
-    ev.stopPropagation();
-    const i=Number(b.dataset.rodoEdit),x=a[i];
-    if(!x)return;
-    const tr=b.closest('tr');
-    tr.outerHTML=rodoEditRow(x,i);
-    clearRodoSelection();
-    const row=$('rodoTable').querySelector('[data-rodo-edit-index="'+i+'"]');
-    row.querySelector('[data-rodo-save]').onclick=()=>saveRodoEdit(x,row);
-    row.querySelector('[data-rodo-cancel]').onclick=()=>renderRodo();
-  });
-
-  $('rodoTable').querySelectorAll('[data-rodo-delete]').forEach(b=>b.onclick=(ev)=>{
-    ev.stopPropagation();
-    const i=Number(b.dataset.rodoDelete),x=a[i];
-    if(!x)return;
-    const klient=rodoValue(x,['klient_imie_nazwisko','klient','imie_nazwisko'])||'ten rekord';
-    if(!confirm('Usunąć zgodę RODO dla „'+klient+'”?')) return;
-    deleteRodoConsent(x);
-  });
-}
-async function saveRodoEdit(x,row){
-  const payload={
-    id:rodoId(x),
-    klient:row.querySelector('[data-edit="klient"]').value.trim(),
-    telefon:row.querySelector('[data-edit="telefon"]').value.trim(),
-    email:row.querySelector('[data-edit="email"]').value.trim(),
-    rodo_potwierdzone:row.querySelector('[data-edit="rodo"]').value==='1',
-    marketing_zgoda:row.querySelector('[data-edit="marketing"]').value==='1'
-  };
-  if(!payload.id){
-    showMsg('rodoMsg','Nie można zapisać: rekord nie zawiera identyfikatora zgody.',true);
-    return;
-  }
-  if(!payload.klient || !payload.telefon || !payload.email){
-    showMsg('rodoMsg','Uzupełnij klienta, telefon i e-mail.',true);
-    return;
-  }
-  showMsg('rodoMsg','Zapisywanie zmian...');
-  const r=await sb.rpc('edytuj_zgode_rodo_admin',{
-    p_id:payload.id,
-    p_workspace_id:WORKSPACE,
-    p_klient:payload.klient,
-    p_telefon:payload.telefon,
-    p_email:payload.email,
-    p_rodo_potwierdzone:payload.rodo_potwierdzone,
-    p_marketing_zgoda:payload.marketing_zgoda
-  });
-  if(r.error){
-    showMsg('rodoMsg','Nie udało się zapisać zmian: '+r.error.message,true);
-    return;
-  }
-  showMsg('rodoMsg','Zmiany zapisane.');
-  await loadRodo();
-}
-async function deleteRodoConsent(x){
-  const id=rodoId(x);
-  if(!id){showMsg('rodoMsg','Nie można usunąć: rekord nie zawiera identyfikatora zgody.',true);return;}
-  showMsg('rodoMsg','Usuwanie zgody...');
-  const r=await sb.rpc('usun_zgode_rodo_admin',{
-    p_id:id,
-    p_workspace_id:WORKSPACE
-  });
-  if(r.error){
-    showMsg('rodoMsg','Nie udało się usunąć zgody: '+r.error.message,true);
-    return;
-  }
-  showMsg('rodoMsg','Zgoda została usunięta.');
-  await loadRodo();
-}
-async function loadRodo(){
-  $('rodoMsg').textContent='Ładowanie zgód RODO...';
-  $('rodoRefresh').disabled=true;
-  $('rodoTable').innerHTML='<tr><td colspan="9" class="rodoLoading">Ładowanie...</td></tr>';
-  try{
-    const r=await sb.rpc('pobierz_zgody_rodo_admin',{p_workspace_id:WORKSPACE});
-    if(r.error){
-      rodoRows=[];
-      rodoLoaded=false;
-      $('rodoMsg').textContent='Nie udało się pobrać zgód RODO: '+r.error.message;
-      $('rodoMsg').className='help err';
-      $('rodoTable').innerHTML='<tr><td colspan="9" class="empty">Brak danych.</td></tr>';
-      $('rodoTotal').textContent='0';
-      $('rodoConfirmed').textContent='0';
-      $('rodoMarketing').textContent='0';
-      $('rodoCount').textContent='';
-      return;
-    }
-    rodoRows=Array.isArray(r.data)?r.data:[];
-    rodoLoaded=true;
-    $('rodoMsg').textContent='Zgody zostały pobrane bezpiecznie z funkcji administracyjnej.';
-    $('rodoMsg').className='help';
-    $('rodoDetail').classList.add('hidden');
-    renderRodo();
-  }catch(e){
-    rodoRows=[];
-    rodoLoaded=false;
-    $('rodoMsg').textContent='Błąd połączenia z funkcją RODO: '+(e?.message||e);
-    $('rodoMsg').className='help err';
-    $('rodoTable').innerHTML='<tr><td colspan="9" class="empty">Brak danych.</td></tr>';
-  }finally{
-    $('rodoRefresh').disabled=false;
-  }
-}
-
-async function loadSettings(){const r=await sb.from('ustawienia').select('*').eq('workspace_id',WORKSPACE).maybeSingle();if(r.error){showMsg('settingsMsg','Nie udało się wczytać ustawień: '+r.error.message,true);return}const x=r.data||{};$('setName').value=x.nazwa_terminarza||'Terminarz wizyt';$('setOwner').value=x.nazwa_osoby||'';$('setPhone').value=x.telefon||'';$('setEmail').value=x.email||'';$('setMessage').value=x.informacja_dla_klienta||''}
-$('settingsForm').onsubmit=async e=>{e.preventDefault();const payload={workspace_id:WORKSPACE,nazwa_terminarza:$('setName').value.trim()||'Terminarz wizyt',nazwa_osoby:$('setOwner').value.trim(),telefon:$('setPhone').value.trim(),email:$('setEmail').value.trim(),informacja_dla_klienta:$('setMessage').value.trim(),updated_at:new Date().toISOString()};const r=await sb.from('ustawienia').upsert(payload,{onConflict:'workspace_id'});if(r.error)showMsg('settingsMsg','Nie udało się zapisać ustawień: '+r.error.message,true);else showMsg('settingsMsg','Ustawienia zapisane w bazie Supabase.')};
-$('loginBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password){showMsg('loginMsg','Podaj e-mail i hasło.',true);return}const btn=$('loginBtn');showMsg('loginMsg','Logowanie...');btn.disabled=true;try{const r=await sb.auth.signInWithPassword({email,password});if(r.error){showMsg('loginMsg','Błąd logowania: '+r.error.message,true);return}showMsg('loginMsg','Zalogowano.');await logged()}catch(e){showMsg('loginMsg','Błąd połączenia z bazą: '+(e?.message||e),true)}finally{btn.disabled=false}};
-$('signupBtn').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password){showMsg('loginMsg','Podaj e-mail i hasło.',true);return}if(password.length<6){showMsg('loginMsg','Hasło musi mieć co najmniej 6 znaków.',true);return}showMsg('loginMsg','Tworzenie konta...');$('signupBtn').disabled=true;const r=await sb.auth.signUp({email,password});$('signupBtn').disabled=false;if(r.error){showMsg('loginMsg','Błąd tworzenia konta: '+r.error.message,true);return}if(r.data?.session){showMsg('loginMsg','Konto utworzone.');await logged()}else showMsg('loginMsg','Konto utworzone. Sprawdź e-mail, jeśli wymagana jest jego weryfikacja.');};
-
-
-/* ===== NAPRAWA: NOWA WIZYTA + STRZAŁKI KALENDARZA ===== */
-$('prev').onclick=function(){
-  view=new Date(view.getFullYear(),view.getMonth()-1,1);
-  renderCalendar();
-};
-$('next').onclick=function(){
-  view=new Date(view.getFullYear(),view.getMonth()+1,1);
-  renderCalendar();
-};
-
-let selectedTime='';
-let slotRequestNo=0;
-
-function normalizeSlotTime(value){
-  const m=String(value??'').match(/(\d{1,2}):(\d{2})/);
-  return m ? String(m[1]).padStart(2,'0')+':'+m[2] : '';
-}
-function timeToMinutes(value){
-  const t=normalizeSlotTime(value),p=t.split(':');
-  return p.length===2 ? Number(p[0])*60+Number(p[1]) : -1;
-}
-function isPastSlot(date,time){
-  const today=iso(new Date());
-  if(date!==today) return false;
-  const now=new Date();
-  return timeToMinutes(time) <= now.getHours()*60+now.getMinutes();
-}
-function selectedServiceRow(){
-  const name=String($('service').value||'').trim().toLowerCase();
-  if(!name) return null;
-  return services.find(x=>String(x.nazwa||'').trim().toLowerCase()===name) || null;
-}
-function syncDurationToService(){
-  const svc=selectedServiceRow();
-  if(svc && Number(svc.czas_trwania)>0) $('duration').value=String(svc.czas_trwania);
-}
-function clearSelectedTime(){
-  selectedTime='';
-  document.querySelectorAll('#availableTimes button[data-time]').forEach(x=>x.classList.remove('selected'));
-}
-async function loadAvailableTimes(){
-  const requestNo=++slotRequestNo;
-  clearSelectedTime();
-  const date=$('date').value;
-  const service=String($('service').value||'').trim();
-  const duration=Number($('duration').value||60);
-  const box=$('availableTimes');
-  if(!date || !service){
-    box.innerHTML='<div class="empty">Wybierz datę i rodzaj wizyty.</div>';
-    return;
-  }
-  if(isOff(date)){
-    box.innerHTML='<div class="empty"><b>Brak terminów.</b><br>Wybrany dzień jest wolny.</div>';
-    return;
-  }
-  const day=dayIndex(date);
-  const work=hours.find(h=>Number(h.dzien_tygodnia)===day && h.aktywne===true);
-  if(!work){
-    box.innerHTML='<div class="empty"><b>Brak terminów.</b><br>W tym dniu nie ma aktywnych godzin pracy.</div>';
-    return;
-  }
-  box.innerHTML='<div class="empty">Pobieram dostępne godziny…</div>';
-  try{
-    const r=await sb.rpc('get_available_slots',{p_workspace_id:WORKSPACE,p_date:date,p_duration:duration});
-    if(requestNo!==slotRequestNo)return;
-    if(r.error){
-      box.innerHTML='<div class="empty"><span class="help err">Nie udało się pobrać dostępnych godzin: '+esc(r.error.message)+'</span></div>';
-      return;
-    }
-    let list=(r.data||[]).map(x=>typeof x==='string'?x:x?.slot_time).map(normalizeSlotTime).filter(Boolean);
-    list=[...new Set(list)].filter(t=>!isPastSlot(date,t));
-    if(!list.length){
-      box.innerHTML='<div class="empty"><b>Brak dostępnych godzin.</b><br>Wybierz inny dzień lub rodzaj wizyty.</div>';
-      return;
-    }
-    box.innerHTML=list.map(t=>'<button type="button" data-time="'+esc(t)+'">'+esc(t)+'</button>').join('');
-    box.querySelectorAll('button[data-time]').forEach(btn=>btn.onclick=()=>{
-      clearSelectedTime();
-      btn.classList.add('selected');
-      selectedTime=btn.dataset.time;
-    });
-  }catch(e){
-    if(requestNo!==slotRequestNo)return;
-    box.innerHTML='<div class="empty"><span class="help err">Błąd pobierania godzin: '+esc(e?.message||e)+'</span></div>';
-  }
-}
-
-$('prev').onclick=function(){
-  view=new Date(view.getFullYear(),view.getMonth()-1,1);
-  renderCalendar();
-};
-$('next').onclick=function(){
-  view=new Date(view.getFullYear(),view.getMonth()+1,1);
-  renderCalendar();
-};
-
-$('date').onchange=loadAvailableTimes;
-$('service').onchange=async()=>{syncDurationToService();await loadAvailableTimes();};
-$('duration').onchange=loadAvailableTimes;
-$('openNewVisitRodo').onclick=function(){ $('newVisitRodoModal').classList.remove('hidden'); };
-$('closeNewVisitRodo').onclick=function(){ $('newVisitRodoModal').classList.add('hidden'); };
-$('newVisitRodoModal').onclick=function(e){ if(e.target===$('newVisitRodoModal')) $('newVisitRodoModal').classList.add('hidden'); };
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') $('newVisitRodoModal').classList.add('hidden'); });
-
-$('clear').onclick=function(){
-  $('form').reset();
-  $('duration').value='60';
-  $('newVisitRodo').checked=false;
-  $('newVisitMarketing').checked=false;
-  $('date').value=iso(selected);
-  clearSelectedTime();
-  $('availableTimes').innerHTML='<div class="empty">Wybierz rodzaj wizyty.</div>';
-};
-
-$('form').onsubmit=async function(e){
-  e.preventDefault();
-  const client=$('client').value.trim();
-  const date=$('date').value;
-  const time=selectedTime;
-  const masseur=$('masseur').value.trim();
-  const service=$('service').value.trim();
-  const duration=Number($('duration').value||60);
-  const phone=$('phone').value.trim();
-  const email=$('clientEmail').value.trim();
-  const note=$('note').value.trim();
-  const rodoConfirmed=$('newVisitRodo').checked;
-  const marketingConsent=$('newVisitMarketing').checked;
-
-  if(!rodoConfirmed){
-    alert('Przed zapisaniem wizyty potwierdź, że klient został poinformowany o przetwarzaniu danych osobowych i zapoznał się z informacją RODO.');
-    return;
-  }
-
-  if(!client||!date||!time||!masseur||!service){
-    alert('Uzupełnij klienta, datę, wybierz masażystę, rodzaj wizyty i dostępną godzinę.');
-    return;
-  }
-  if(isPastSlot(date,time)){
-    alert('Wybrana godzina już minęła. Wybierz aktualnie dostępną godzinę.');
-    await loadAvailableTimes();
-    return;
-  }
-
-  const btn=$('form').querySelector('button:not([type="button"])');
-  if(btn) btn.disabled=true;
-
-  try{
-    const reservationId=crypto.randomUUID();
-    const payload={
-      id:reservationId,
-      workspace_id:WORKSPACE,
-      klient:client,
-      data:date,
-      godzina:time,
-      masazysta:masseur,
-      usluga:service,
-      czas_trwania:duration,
-      telefon:phone,
-      email:email,
-      notatka:note,
-      status:'oczekuje'
-    };
-
-    const r=await sb.from('wizyty').insert(payload);
-    if(r.error){
-      alert('Nie udało się dodać wizyty: '+r.error.message);
-      return;
-    }
-
-    const rodoResult=await sb.rpc('zapisz_zgode_rodo',{
-      p_rezerwacja_id:reservationId,
-      p_workspace_id:WORKSPACE,
-      p_rodo_wersja:NEW_VISIT_RODO_VERSION,
-      p_marketing_zgoda:marketingConsent
-    });
-    if(rodoResult.error){
-      alert('Wizyta została zapisana, ale nie udało się zapisać zgody RODO: '+rodoResult.error.message);
-      return;
-    }
-
-    selected=new Date(date+'T12:00:00');
-    view=new Date(selected.getFullYear(),selected.getMonth(),1);
-    $('form').reset();
-    $('duration').value='60';
-    $('newVisitRodo').checked=false;
-    $('newVisitMarketing').checked=false;
-    $('date').value=date;
-    clearSelectedTime();
-    await refreshAll();
-    await loadAvailableTimes();
-    alert('Wizyta została dodana.');
-  }catch(err){
-    alert('Błąd dodawania wizyty: '+(err?.message||err));
-  }finally{
-    if(btn) btn.disabled=false;
-  }
-};
-
-/* ===== NAPRAWA FILTRÓW WIZYT =====
-   Filtry były narysowane w HTML i renderVisitsTable() je obsługiwał,
-   ale brakowało podpięcia zdarzeń do pól. W efekcie wpisanie tekstu,
-   zmiana statusu lub zakresu dat nie odświeżała tabeli.
-*/
-function bindVisitFilters(){
-  const search=$('visitSearch');
-  const status=$('visitStatus');
-  const from=$('visitFrom');
-  const to=$('visitTo');
-  const clear=$('clearVisitFilters');
-  if(search) search.addEventListener('input',renderVisitsTable);
-  if(status) status.addEventListener('change',renderVisitsTable);
-  if(from) from.addEventListener('change',renderVisitsTable);
-  if(to) to.addEventListener('change',renderVisitsTable);
-  if(clear) clear.addEventListener('click',()=>{
-    if(search) search.value='';
-    if(status) status.value='';
-    if(from) from.value='';
-    if(to) to.value='';
-    renderVisitsTable();
-  });
-}
-bindVisitFilters();
-
-$('rodoSearch').oninput=renderRodo;
-$('rodoFrom').onchange=renderRodo;
-$('rodoTo').onchange=renderRodo;
-$('rodoRefresh').onclick=loadRodo;
-document.querySelectorAll('.sideItem[data-panel="rodoPanel"]').forEach(b=>{
-  b.addEventListener('click',async()=>{
-    if(!rodoLoaded) await loadRodo();
-  });
-});
-
-$('usersRefreshBtn').onclick=async()=>{
-  const {data}=await sb.auth.getSession();
-  if(data?.session?.user) await loadUsersAdmin();
-};
-
-$('changePasswordForm').onsubmit=async e=>{
-  e.preventDefault();
-  const p1=$('newPassword').value;
-  const p2=$('newPassword2').value;
-  if(!p1||!p2){showMsg('passwordMsg','Wpisz nowe hasło dwa razy.',true);return;}
-  if(p1.length<6){showMsg('passwordMsg','Hasło musi mieć co najmniej 6 znaków.',true);return;}
-  if(p1!==p2){showMsg('passwordMsg','Hasła nie są identyczne.',true);return;}
-  const btn=e.target.querySelector('button[type="submit"]');
-  btn.disabled=true;
-  showMsg('passwordMsg','Zmiana hasła…');
-  try{
-    const r=await sb.auth.updateUser({password:p1});
-    if(r.error) throw r.error;
-    $('newPassword').value='';$('newPassword2').value='';
-    showMsg('passwordMsg','Hasło zostało zmienione.');
-  }catch(e){
-    showMsg('passwordMsg','Nie udało się zmienić hasła: '+(e?.message||e),true);
-  }finally{btn.disabled=false;}
-};
-
-$('forgotPasswordBtn').onclick=async()=>{
-  const email=$('email').value.trim();
-  if(!email){showMsg('loginMsg','Najpierw wpisz swój adres e-mail.',true);$('email').focus();return;}
-  const btn=$('forgotPasswordBtn');btn.disabled=true;
-  showMsg('loginMsg','Jeżeli konto z tym adresem istnieje, otrzymasz wiadomość z instrukcją odzyskania hasła.');
-  try{
-    const redirectTo='https://aj-gabinetmasazu.github.io/terminarz-wizyt/etap3b-test/';
-    const r=await sb.auth.resetPasswordForEmail(email,{redirectTo});
-    if(r.error) throw r.error;
-    showMsg('loginMsg','Jeżeli konto z tym adresem istnieje, otrzymasz wiadomość z instrukcją odzyskania hasła. Sprawdź także folder SPAM.');
-  }catch(e){
-    showMsg('loginMsg','Nie udało się wysłać wiadomości: '+(e?.message||e),true);
-  }finally{btn.disabled=false;}
-};
-
-$('recoverySaveBtn').onclick=async()=>{
-  const p1=$('recoveryPassword').value;
-  const p2=$('recoveryPassword2').value;
-  if(!p1||!p2){showMsg('recoveryMsg','Wpisz nowe hasło dwa razy.',true);return;}
-  if(p1.length<6){showMsg('recoveryMsg','Hasło musi mieć co najmniej 6 znaków.',true);return;}
-  if(p1!==p2){showMsg('recoveryMsg','Hasła nie są identyczne.',true);return;}
-  const btn=$('recoverySaveBtn');btn.disabled=true;
-  showMsg('recoveryMsg','Zapisywanie nowego hasła…');
-  try{
-    const r=await sb.auth.updateUser({password:p1});
-    if(r.error) throw r.error;
-    showMsg('recoveryMsg','Hasło zostało zmienione. Za chwilę wrócisz do logowania.');
-    setTimeout(async()=>{await sb.auth.signOut();await hideRecoveryPanel();showMsg('loginMsg','Hasło zostało zmienione. Możesz teraz zalogować się nowym hasłem.');},900);
-  }catch(e){
-    showMsg('recoveryMsg','Nie udało się ustawić nowego hasła: '+(e?.message||e),true);
-  }finally{btn.disabled=false;}
-};
-
-sb.channel('terminarz-wizyty').on('postgres_changes',{event:'*',schema:'public',table:'wizyty',filter:'workspace_id=eq.'+WORKSPACE},()=>refreshAll()).subscribe();
-$('logout').onclick=async()=>{const r=await sb.auth.signOut();if(r.error)alert('Nie udało się wylogować: '+r.error.message);else await logged()};
-
-/*
-  Odzyskiwanie hasła ma pierwszeństwo przed normalnym otwarciem aplikacji.
-  Supabase może podczas wejścia z linku wysłać kilka zdarzeń auth (m.in.
-  INITIAL_SESSION / SIGNED_IN oraz PASSWORD_RECOVERY). Nie wolno wtedy
-  pozwolić, aby zwykłe logged() otworzyło program przed ekranem zmiany hasła.
-*/
-sb.auth.onAuthStateChange((event)=>{
-  /* Każde zdarzenie auth podczas powrotu z resetu hasła ma pozostać
-     na ekranie odzyskiwania. Szczególnie nie wpuszczamy tu SIGNED_IN. */
-  if(event==='PASSWORD_RECOVERY' || recoveryMode || isRecoveryLink){
-    recoveryMode=true;
-    showRecoveryPanel();
-    return;
-  }
-  logged();
-});
-
-$('date').value=iso(selected);
-
-/* Pierwsza inicjalizacja jest blokowana dla linku recovery. */
-if(isRecoveryLink){
-  showRecoveryPanel();
-}else{
-  logged();
-}
-</script></body></html>
+</script>
+</body>
+</html>
