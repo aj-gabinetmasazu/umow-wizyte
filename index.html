@@ -11,6 +11,9 @@
 <title>Umów wizytę</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>window.TERM_CONFIG={SUPABASE_URL:"https://oiabhlviecdkstuedmdp.supabase.co",SUPABASE_PUBLISHABLE_KEY:"sb_publishable_IoteuBlBG9exrD5ubm-z4A_9szDC9Md",WORKSPACE_ID:"11111111-1111-1111-1111-111111111111"};</script>
+<!-- WERSJA_TESTOWA_2026-09-16-ANDROID-01 -->
+<script>window.__APP_VERSION_TEST__="WERSJA_TESTOWA_2026-09-16-ANDROID-01";</script>
+
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;min-height:100%;font-family:Arial,sans-serif;background:#f7f1e8;color:#3a2430}
@@ -55,6 +58,8 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .client-settings .client-owner{font-weight:bold;margin-bottom:7px}
 .client-settings .client-contact{line-height:1.55}
 .client-settings .client-info{margin-top:10px;padding:10px;background:#efe4d0;line-height:1.5}
+.client-settings .client-info-item{padding:5px 0}
+.client-settings .client-info-item + .client-info-item{border-top:1px solid #d8c8aa;margin-top:5px;padding-top:9px}
 .client-settings a{color:#64152d;font-weight:bold}
 
 @media(max-width:520px){
@@ -72,15 +77,24 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 
 
-<div style="display: flex; justify-content: center; width: 100%;">
+
+
+<div style="display: flex; justify-content: center; align-items: center; min-height: 15vh; margin: 0; box-sizing: border-box;">
   <div style="display: flex; align-items: center; gap: 1rem;">
-    <img src="./aj_logo.png" style="height: 4.5rem;">
+    <img src="./aj_logo.png" style="height: 7rem;">
     <div>
-      <h3 id="calendarName" style="margin: 0; font-size: 2rem;">Umów wizytę</h3>
-      <div id="ownerName">Wybierz usługę, dzień i wolną godzinę</div>
+      <h1 id="calendarName" style="margin: 0; font-size: 2rem;">Umów wizytę</h1>
+      <div id="ownerName" style="color: #555;">Wybierz usługę, dzień i wolną godzinę</div>
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
 
 
 
@@ -98,7 +112,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <div id="clientInfo" class="client-info hidden"></div>
   </div>
   <div class="card">
-    <label for="masseur">Wybierz Masażystę</label>
+    <label for="masseur">Masażysta</label>
     <select id="masseur" required>
       <option value="">— wybierz masażystę —</option>
       <option value="Agata">Agata</option>
@@ -174,8 +188,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <div id="rodoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rodoTitle">
       <div class="modal">
         <h2 id="rodoTitle">Informacja o przetwarzaniu danych osobowych</h2>
-        <p><b>Administratorem danych osobowych jest Agata Jankowska, ul. Kolejowa 26D,83-200 Starogard Gdański,
-Pomorskiek.</b></p>
+        <p><b>Administratorem danych osobowych jest Anita Wrzesińska, ul. Kazimierza Leskiego 24/1, 80-180 Gdańsk.</b></p>
 
         <p>Dane podane w formularzu „Umów wizytę”, w szczególności imię i nazwisko, numer telefonu, adres e-mail oraz informacje przekazane w polu „Uwagi”, są przetwarzane w celu obsługi rezerwacji wizyty, kontaktu w sprawie rezerwacji oraz organizacji umówionej wizyty.</p>
 
@@ -190,7 +203,7 @@ Pomorskiek.</b></p>
       </div>
     </div>
 
-    <button id="book" disabled>Wyślij rezerwację</button>
+    <button type="button" id="book" disabled>Wyślij rezerwację</button>
     <div id="msg" class="notice">Rezerwacja wymaga potwierdzenia przez właściciela.</div>
 
 
@@ -310,7 +323,7 @@ function getHoursForDate(dateString) {
 async function loadClientSettings() {
   const r = await sb
     .from('ustawienia')
-    .select('nazwa_terminarza,nazwa_osoby,telefon,email,informacja_dla_klienta')
+    .select('nazwa_terminarza,nazwa_osoby,telefon,email,informacja_dla_klienta,informacja_dla_klienta_2,informacja_dla_klienta_3')
     .eq('workspace_id', W)
     .maybeSingle();
 
@@ -325,6 +338,8 @@ async function loadClientSettings() {
   const phone = String(x.telefon || '').trim();
   const email = String(x.email || '').trim();
   const info = String(x.informacja_dla_klienta || '').trim();
+  const info2 = String(x.informacja_dla_klienta_2 || '').trim();
+  const info3 = String(x.informacja_dla_klienta_3 || '').trim();
 
   if (calendarName) {
     $('calendarName').textContent = calendarName;
@@ -348,10 +363,14 @@ async function loadClientSettings() {
   }
 
   $('clientContact').innerHTML = contacts.join('');
-  $('clientInfo').textContent = info;
-  $('clientInfo').classList.toggle('hidden', !info);
 
-  $('clientSettings').classList.toggle('hidden', !(owner || contacts.length || info));
+  const infoParts = [info, info2, info3].filter(Boolean);
+  $('clientInfo').innerHTML = infoParts.map(text =>
+    '<div class="client-info-item">' + esc(text) + '</div>'
+  ).join('');
+  $('clientInfo').classList.toggle('hidden', !infoParts.length);
+
+  $('clientSettings').classList.toggle('hidden', !(owner || contacts.length || infoParts.length));
   return true;
 }
 
@@ -585,30 +604,32 @@ async function bookAppointment() {
 
   try {
     /*
-      Zapis dokładnie tak jak w Admin → Terminarz → Nowa wizyta:
-      bezpośredni INSERT do public.wizyty, następnie zapis zgody RODO.
+      Rezerwacja przez bezpieczną funkcję RPC.
+      Nie wykonujemy bezpośredniego INSERT do public.wizyty,
+      ponieważ klient publiczny działa z RLS i zapis bezpośredni
+      jest blokowany na Androidzie/iOS.
     */
-    const reservationId = crypto.randomUUID();
+    const { data: reservationId, error: visitError } = await sb.rpc('book_appointment_with_masseur', {
+      p_workspace_id: W,
+      p_client_name: client,
+      p_phone: phone,
+      p_email: email,
+      p_service: service,
+      p_date: date,
+      p_time: time.length === 5 ? time + ':00' : time,
+      p_duration: duration,
+      p_note: note,
+      p_masazysta: masseur
+    });
 
-    const payload = {
-      id: reservationId,
-      workspace_id: W,
-      klient: client,
-      data: date,
-      godzina: time.length === 5 ? time + ':00' : time,
-      masazysta: masseur,
-      usluga: service,
-      czas_trwania: duration,
-      telefon: phone,
-      email: email,
-      notatka: note,
-      status: 'oczekuje'
-    };
+    if (visitError) {
+      setMessage('<span class="err">Nie udało się dodać wizyty: ' + esc(visitError.message) + '</span>','err');
+      await slots();
+      return;
+    }
 
-    const visitResult = await sb.from('wizyty').insert(payload);
-
-    if (visitResult.error) {
-      setMessage('<span class="err">Nie udało się dodać wizyty: ' + esc(visitResult.error.message) + '</span>','err');
+    if (!reservationId) {
+      setMessage('<span class="err">Nie udało się utworzyć rezerwacji.</span>','err');
       await slots();
       return;
     }
