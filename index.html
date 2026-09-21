@@ -8,12 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Umów wizytę</title>
+<title>Umów wizytę — Multi-Firma V3</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>window.TERM_CONFIG={SUPABASE_URL:"https://oiabhlviecdkstuedmdp.supabase.co",SUPABASE_PUBLISHABLE_KEY:"sb_publishable_IoteuBlBG9exrD5ubm-z4A_9szDC9Md",WORKSPACE_ID:"11111111-1111-1111-1111-111111111111"};</script>
-<!-- WERSJA_TESTOWA_2026-09-16-ANDROID-01 -->
-<script>window.__APP_VERSION_TEST__="WERSJA_TESTOWA_2026-09-16-ANDROID-01";</script>
-
+<script>/* WERSJA_TESTOWA: CLIENT_MULTI_FIRMA_V4-BEZPIECZNY-RPC */
+window.TERM_CONFIG={
+SUPABASE_URL:"https://oiabhlviecdkstuedmdp.supabase.co",
+SUPABASE_PUBLISHABLE_KEY:"sb_publishable_IoteuBlBG9exrD5ubm-z4A_9szDC9Md",
+WORKSPACE_ID:"11111111-1111-1111-1111-111111111111",
+COMPANY_NAME:"AJ – Gabinet Masażu",
+COMPANIES:[]
+};</script>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;min-height:100%;font-family:Arial,sans-serif;background:#f7f1e8;color:#3a2430}
@@ -57,9 +61,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .client-settings h2{margin:0 0 8px;color:#64152d;font-size:19px}
 .client-settings .client-owner{font-weight:bold;margin-bottom:7px}
 .client-settings .client-contact{line-height:1.55}
-.client-settings .client-info{margin-top:10px;padding:10px;background:#efe4d0;line-height:1.5}
-.client-settings .client-info-item{padding:5px 0}
-.client-settings .client-info-item + .client-info-item{border-top:1px solid #d8c8aa;margin-top:5px;padding-top:9px}
+.client-settings .client-info{margin-top:10px;padding:10px;background:#efe4d0;line-height:1.5;border-left:3px solid #64152d}.company-search{margin-top:12px}.company-search label{margin-top:0}.company-info-box{margin-top:8px;padding:10px;background:#efe4d0;line-height:1.5}.company-info-box.hidden{display:none}
 .client-settings a{color:#64152d;font-weight:bold}
 
 @media(max-width:520px){
@@ -77,24 +79,15 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 
 
-
-
-<div style="display: flex; justify-content: center; align-items: center; min-height: 15vh; margin: 0; box-sizing: border-box;">
+<div style="display: flex; justify-content: center; width: 100%;">
   <div style="display: flex; align-items: center; gap: 1rem;">
-    <img src="./images/aj_logo.png" style="height: 7rem;">
+    <img src="./aj_logo.png" style="height: 4.5rem;">
     <div>
-      <h1 id="calendarName" style="margin: 0; font-size: 2rem;">Umów wizytę</h1>
-      <div id="ownerName" style="color: #555;">Wybierz usługę, dzień i wolną godzinę</div>
+      <h3 id="calendarName" style="margin: 0; font-size: 2rem;">AJ – Gabinet Masażu</h3>
+      <div id="ownerName">Wybierz datę, rodzaj wizyty, usługę i dostępną godzinę wizyty</div>
     </div>
   </div>
 </div>
-
-
-
-
-
-
-
 
 
 
@@ -109,30 +102,24 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <h2 id="clientSettingsTitle">Informacje o gabinecie</h2>
     <div id="clientOwner" class="client-owner"></div>
     <div id="clientContact" class="client-contact"></div>
-    <div id="clientInfo" class="client-info hidden"></div>
+    <div id="clientInfo1" class="client-info hidden"></div>
+    <div id="clientInfo2" class="client-info hidden"></div>
+    <div id="clientInfo3" class="client-info hidden"></div>
   </div>
   <div class="card">
-    <label for="masseur">Masażysta</label>
+    <label for="masseur">Wybierz Masażystę</label>
     <select id="masseur" required>
-      <option value="">— wybierz masażystę —</option>
-      <option value="Agata">Agata</option>
-      <option value="Andrzej">Andrzej</option>
+      <option value="">— najpierw wybierz firmę —</option>
     </select>
 
-    <label for="service">Rodzaj wizyty</label>
-    <select id="service" required>
-      <option value="">— wybierz rodzaj wizyty —</option>
-      <option value="masaż ciała">masaż ciała</option>
-      <option value="masaż twarzy">masaż twarzy</option>
-      <option value="masaż gorącymi kamieniami">masaż gorącymi kamieniami</option>
-      <option value="masaż maseczka/maskalat">masaż maseczka/maskalat</option>
+    <label for="visitType">Rodzaj wizyty</label>
+    <select id="visitType" required>
+      <option value="">— najpierw wybierz firmę —</option>
     </select>
-    <label for="duration">Czas planowanej wizyty</label>
-    <select id="duration" required>
-      <option value="">— wybierz czas —</option>
-      <option value="30">30 min</option>
-      <option value="60">60 min</option>
-      <option value="90">90 min</option>
+
+    <label for="service">Usługa</label>
+    <select id="service" required>
+      <option value="">— najpierw wybierz firmę —</option>
     </select>
 
     <label for="date">Data</label>
@@ -188,7 +175,8 @@ button:disabled{opacity:.55;cursor:not-allowed}
     <div id="rodoModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="rodoTitle">
       <div class="modal">
         <h2 id="rodoTitle">Informacja o przetwarzaniu danych osobowych</h2>
-        <p><b>Administratorem danych osobowych jest  Agata Jankowska, ul. Kolejowa 26D, 83-200 Starogard Gdański, Pomorskie.</b></p>
+        <p><b>Administratorem danych osobowych jest Agata Jankowska, ul. Kolejowa 26D,83-200 Starogard Gdański,
+Pomorskiek.</b></p>
 
         <p>Dane podane w formularzu „Umów wizytę”, w szczególności imię i nazwisko, numer telefonu, adres e-mail oraz informacje przekazane w polu „Uwagi”, są przetwarzane w celu obsługi rezerwacji wizyty, kontaktu w sprawie rezerwacji oraz organizacji umówionej wizyty.</p>
 
@@ -203,7 +191,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
       </div>
     </div>
 
-    <button type="button" id="book" disabled>Wyślij rezerwację</button>
+    <button id="book" disabled>Wyślij rezerwację</button>
     <div id="msg" class="notice">Rezerwacja wymaga potwierdzenia przez właściciela.</div>
 
 
@@ -236,7 +224,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
   <div class="dm-brand-title" style="display: flex; align-items: center; gap: 6px; justify-content: center;">
     <span>autor:</span>
-    <img src="./images/imie-i-nazwisko-2.png" style="height: 1.5rem; width: 10rem; object-fit: contain;" alt="Anita Wrzesińska">
+    <img src="./imie-i-nazwisko-2.png" style="height: 1.5rem; width: 10rem; object-fit: contain;" alt="Anita Wrzesińska">
   </div>
 </div>
 
@@ -251,16 +239,63 @@ button:disabled{opacity:.55;cursor:not-allowed}
 
 const C = window.TERM_CONFIG || {};
 const sb = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_PUBLISHABLE_KEY);
-const W = C.WORKSPACE_ID;
 const $ = id => document.getElementById(id);
 
+let W = "";
+let workers = [];
+let visitTypes = [];
+let selectedWorkspaceToken = "";
 let services = [];
 let workHours = [];
 let daysOff = [];
 let selected = '';
+let selectedServiceId = '';
+let selectedServiceDuration = 0;
 let loadingSlots = false;
 const RODO_VERSION = '1.0';
 const RODO_ADMIN = 'Anita Wrzesińska, ul. Kazimierza Leskiego 24/1, 80-180 Gdańsk';
+const FIXED_WORKSPACE_ID = String(window.TERM_CONFIG?.WORKSPACE_ID || "");
+const FIXED_COMPANY_NAME = String(window.TERM_CONFIG?.COMPANY_NAME || "Firma");
+
+function resetCompanyData(){
+  services=[]; workers=[]; visitTypes=[]; workHours=[]; daysOff=[]; selected=''; selectedServiceId=''; selectedServiceDuration=0; loadingSlots=false; selectedWorkspaceToken='';
+  $('service').innerHTML = '<option value="">— wybierz usługę —</option>' +
+    services.filter(s => {
+      const id = String(s.id || '').trim();
+      const name = String(s.nazwa || '').trim();
+      const duration = Number(s.czas_trwania);
+      return !!id && !!name && Number.isInteger(duration) && duration >= 1 && duration <= 480;
+    }).map(s => {
+      const id = String(s.id).trim();
+      const name = String(s.nazwa).trim();
+      const duration = Number(s.czas_trwania);
+      return '<option value="' + esc(id) + '" data-duration="' + duration + '" data-name="' + esc(name) + '">' +
+        esc(name) + ' — ' + duration + ' min</option>';
+    }).join('');
+  $('visitType').innerHTML='<option value="">— ładowanie rodzajów wizyt —</option>';
+  $('masseur').innerHTML='<option value="">— ładowanie masażystów —</option>';
+  selectedServiceId=''; selectedServiceDuration=0; $('slots').innerHTML='<div class="empty">Ładowanie danych firmy…</div>';
+  $('dayInfo').textContent=''; $('book').disabled=true;
+  $('clientSettings').classList.add('hidden');
+  ['clientInfo1','clientInfo2','clientInfo3'].forEach(id=>{const el=$(id); if(el){el.textContent='';el.classList.add('hidden');}});
+  $('calendarName').textContent=FIXED_COMPANY_NAME;
+  $('ownerName').textContent='Ładowanie danych firmy…';
+}
+
+async function selectFixedCompany(){
+  resetCompanyData();
+  W=FIXED_WORKSPACE_ID;
+  selectedWorkspaceToken=W;
+  if(!W){setMessage('<span class="err">Brak przypisanego workspace_id dla tego Panelu Klienta.</span>','err');return false;}
+  setMessage('Pobieram dane firmy: <b>'+esc(FIXED_COMPANY_NAME)+'</b>…');
+  const okSettings=await loadClientSettings();
+  const okServices=await loadServices();
+  const okRules=await loadRules();
+  if(!okSettings || !okServices || !okRules) return false;
+  await slots();
+  return true;
+}
+
 
 const pad = n => String(n).padStart(2,'0');
 
@@ -321,114 +356,92 @@ function getHoursForDate(dateString) {
 }
 
 async function loadClientSettings() {
-  const r = await sb
-    .from('ustawienia')
-    .select('nazwa_terminarza,nazwa_osoby,telefon,email,informacja_dla_klienta,informacja_dla_klienta_2,informacja_dla_klienta_3')
-    .eq('workspace_id', W)
-    .maybeSingle();
-
-  if (r.error) {
-    console.warn('Nie udało się pobrać ustawień dla klienta:', r.error.message);
+  if(!W) return false;
+  const {data,error} = await sb.rpc('public_get_booking_config', { p_workspace_id: W });
+  if (error) {
+    console.warn('Nie udało się pobrać bezpiecznej konfiguracji firmy:', error.message);
+    setMessage('<span class="err">Nie udało się pobrać danych wybranej firmy.</span>','err');
     return false;
   }
-
-  const x = r.data || {};
+  const cfg = data || {};
+  if (String(cfg.workspace_id || '') !== String(W)) {
+    resetCompanyData();
+    $('companyChooserMsg').innerHTML='<span class="err">Dane firmy nie zostały załadowane, ponieważ identyfikator firmy się nie zgadza.</span>';
+    return false;
+  }
+  const x = cfg.settings || {};
   const calendarName = String(x.nazwa_terminarza || '').trim();
   const owner = String(x.nazwa_osoby || '').trim();
   const phone = String(x.telefon || '').trim();
   const email = String(x.email || '').trim();
-  const info = String(x.informacja_dla_klienta || '').trim();
+  const info1 = String(x.informacja_dla_klienta || '').trim();
   const info2 = String(x.informacja_dla_klienta_2 || '').trim();
   const info3 = String(x.informacja_dla_klienta_3 || '').trim();
+  if (calendarName) { $('calendarName').textContent = calendarName; $('clientSettingsTitle').textContent = calendarName; }
+  $('ownerName').textContent = owner || 'Wybierz datę, rodzaj wizyty, usługę i dostępną godzinę wizyty';
+  $('clientOwner').textContent = owner;
+  const contacts=[];
+  if(phone){ const tel=phone.replace(/[^\d+]/g,''); contacts.push('<div>Telefon: <a href="tel:'+esc(tel)+'">'+esc(phone)+'</a></div>'); }
+  if(email){ contacts.push('<div>E-mail: <a href="mailto:'+encodeURIComponent(email)+'">'+esc(email)+'</a></div>'); }
+  $('clientContact').innerHTML=contacts.join('');
+  [['clientInfo1',info1],['clientInfo2',info2],['clientInfo3',info3]].forEach(([id,txt])=>{const el=$(id);if(!el)return;el.textContent=txt;el.classList.toggle('hidden',!txt);});
+  $('clientSettings').classList.toggle('hidden', !(owner || contacts.length || info1 || info2 || info3));
+  return true;
+}
 
-  if (calendarName) {
-    $('calendarName').textContent = calendarName;
-    $('clientSettingsTitle').textContent = calendarName;
+async function getCompanyConfigStrict(){
+  if(!W || selectedWorkspaceToken!==W) return null;
+  const requested=W;
+  const {data,error}=await sb.rpc('public_get_booking_config',{p_workspace_id:requested});
+  if(error || !data || String(data.workspace_id)!==String(requested)){
+    resetCompanyData();
+    $('companyChooserMsg').innerHTML='<span class="err">Nie udało się bezpiecznie załadować danych wybranej firmy.</span>';
+    return null;
   }
+  return data;
+}
 
-  if (owner) {
-    $('ownerName').textContent = owner;
-    $('clientOwner').textContent = owner;
-  } else {
-    $('ownerName').textContent = 'Wybierz usługę, dzień i wolną godzinę';
-  }
+function applyWorkersAndVisitTypes(cfg){
+  if(!cfg || String(cfg.workspace_id)!==String(W)) return false;
+  workers=Array.isArray(cfg.workers)?cfg.workers:[];
+  visitTypes=Array.isArray(cfg.visit_types)?cfg.visit_types:[];
+  $('masseur').innerHTML='<option value="">— wybierz masażystę —</option>'+workers.map(w=>{
+    const n=(String(w.imie||'')+' '+String(w.nazwisko||'')).trim();
+    return '<option value="'+esc(n)+'">'+esc(n)+'</option>';
+  }).join('');
 
-  const contacts = [];
-  if (phone) {
-    const tel = phone.replace(/[^\d+]/g,'');
-    contacts.push('<div>Telefon: <a href="tel:' + esc(tel) + '">' + esc(phone) + '</a></div>');
-  }
-  if (email) {
-    contacts.push('<div>E-mail: <a href="mailto:' + encodeURIComponent(email) + '">' + esc(email) + '</a></div>');
-  }
-
-  $('clientContact').innerHTML = contacts.join('');
-
-  const infoParts = [info, info2, info3].filter(Boolean);
-  $('clientInfo').innerHTML = infoParts.map(text =>
-    '<div class="client-info-item">' + esc(text) + '</div>'
-  ).join('');
-  $('clientInfo').classList.toggle('hidden', !infoParts.length);
-
-  $('clientSettings').classList.toggle('hidden', !(owner || contacts.length || infoParts.length));
+  $('visitType').innerHTML='<option value="">— wybierz rodzaj wizyty —</option>'+visitTypes.map(v=>{
+    const n=String(v.nazwa||'').trim();
+    return '<option value="'+esc(n)+'">'+esc(n)+'</option>';
+  }).join('');
   return true;
 }
 
 async function loadServices() {
-  const {data,error} = await sb
-    .from('uslugi')
-    .select('id,nazwa,czas_trwania')
-    .eq('workspace_id', W)
-    .eq('aktywna', true)
-    .order('nazwa');
-
-  if (error) {
-    services = [];
-    setMessage('<span class="err">Nie udało się pobrać usług: ' + esc(error.message) + '</span>','err');
-    return false;
-  }
-
-  services = data || [];
-
-  // Nazwy widoczne dla klienta.
-  const wanted = [
-    'masaż ciała',
-    'masaż twarzy',
-    'masaż gorącymi kamieniami',
-    'masaż maseczka/maskalat'
-  ];
-
-  $('service').innerHTML =
-    '<option value="">— wybierz rodzaj wizyty —</option>' +
-    wanted.map(name =>
-      '<option value="' + esc(name) + '">' + esc(name) + '</option>'
-    ).join('');
-
-  return true;
+  const cfg=await getCompanyConfigStrict(); if(!cfg) return false;
+  services=Array.isArray(cfg.services)?cfg.services:[];
+  const rows=[]; const seen=new Set();
+  services.forEach(s=>{
+    const id=String(s.id||'').trim();
+    const name=String(s.nazwa||'').trim();
+    const dur=Number(s.czas_trwania);
+    if(!id||!name||!Number.isInteger(dur)||dur<1||dur>480)return;
+    if(seen.has(id))return;
+    seen.add(id); rows.push({id,name,dur});
+  });
+  rows.sort((a,b)=>a.name.localeCompare(b.name,'pl')||a.dur-b.dur);
+  $('service').innerHTML='<option value="">— wybierz usługę —</option>'+rows.map(x=>
+    '<option value="'+esc(x.id)+'" data-duration="'+x.dur+'" data-name="'+esc(x.name)+'">'+esc(x.name)+' — '+x.dur+' min</option>'
+  ).join('');
+  selectedServiceId=''; selectedServiceDuration=0;
+  applyWorkersAndVisitTypes(cfg); return true;
 }
 
 async function loadRules() {
-  const [hoursResult, offResult] = await Promise.all([
-    sb.from('godziny_pracy')
-      .select('dzien_tygodnia,od,do,aktywne')
-      .eq('workspace_id', W),
-    sb.from('dni_wolne')
-      .select('od,do,opis')
-      .eq('workspace_id', W)
-      .order('od')
-  ]);
-
-  if (hoursResult.error) {
-    setMessage('<span class="err">Nie udało się pobrać godzin pracy: ' + esc(hoursResult.error.message) + '</span>','err');
-    return false;
-  }
-  if (offResult.error) {
-    setMessage('<span class="err">Nie udało się pobrać dni wolnych: ' + esc(offResult.error.message) + '</span>','err');
-    return false;
-  }
-
-  workHours = hoursResult.data || [];
-  daysOff = offResult.data || [];
+  const cfg=await getCompanyConfigStrict();
+  if(!cfg) return false;
+  workHours=Array.isArray(cfg.hours)?cfg.hours.map(h=>({...h,aktywne:true})):[];
+  daysOff=Array.isArray(cfg.days_off)?cfg.days_off:[];
   return true;
 }
 
@@ -449,150 +462,110 @@ function renderDayMessage() {
   return 'open';
 }
 
-function durationToMinutes(value) {
-  if (value == null || value === '') return NaN;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : NaN;
-  const raw = String(value).trim();
-  const hm = raw.match(/^(\d{1,3}):(\d{2})(?::(\d{2}))?$/);
-  if (hm) return Number(hm[1]) * 60 + Number(hm[2]);
-  const m = raw.match(/(\d+(?:[.,]\d+)?)\s*(?:min|m|minutes?)?/i);
-  if (m) {
-    const n = Number(String(m[1]).replace(',', '.'));
-    return Number.isFinite(n) ? n : NaN;
-  }
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : NaN;
+function getSelectedService() {
+  const id=String(selectedServiceId || $('service')?.value || '').trim();
+  if(!id) return null;
+  return services.find(s=>String(s.id||'').trim()===id) || null;
 }
 
-function normalizeServiceName(value) {
-  return String(value ?? '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('pl-PL');
-}
-
-function getDbServiceForSelection(serviceName, duration) {
-  const wantedName = normalizeServiceName(serviceName);
-  const minutes = durationToMinutes(duration);
-  return services.find(s =>
-    normalizeServiceName(s.nazwa) === wantedName &&
-    durationToMinutes(s.czas_trwania) === minutes
-  ) || null;
+function syncServiceSelection() {
+  const select=$('service');
+  const opt=select?.options?.[select.selectedIndex];
+  selectedServiceId=String(opt?.value || '').trim();
+  selectedServiceDuration=Number(opt?.dataset?.duration || 0);
+  selected='';
+  $('slots').innerHTML='<div class="empty">Wybierz datę i usługę.</div>';
+  $('book').disabled=true;
 }
 
 async function slots() {
-  selected = '';
-  $('book').disabled = true;
-  const date = $('date').value;
-  const serviceName = $('service').value;
-  const duration = Number($('duration').value || 0);
-
-  $('slots').innerHTML = '<div class="empty">Sprawdzam dostępne godziny…</div>';
-  if (!serviceName || !date || !duration) return;
-
-  const state = renderDayMessage();
-  if (state === 'off') {
-    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W wybranym dniu masz urlop / dzień wolny.</div>';
-    return;
-  }
-  if (state === 'closed') {
-    $('slots').innerHTML = '<div class="empty"><b>Brak terminów.</b><br>W tym dniu nie ma ustawionych godzin pracy.</div>';
-    return;
-  }
-
-  loadingSlots = true;
-  try {
-    const {data,error} = await sb.rpc('get_available_slots', {
-      p_workspace_id: W,
-      p_date: date,
-      p_duration: duration
-    });
-
-    if (error) {
-      $('slots').innerHTML = '<div class="empty"><span class="err">Nie udało się pobrać wolnych godzin: ' + esc(error.message) + '</span></div>';
-      return;
+  if(!W){ $('slots').innerHTML='<div class="empty">Brak przypisanej firmy.</div>'; return; }
+  selected=''; $('book').disabled=true;
+  const date=String($('date').value||'').trim();
+  const serviceId=String(selectedServiceId || $('service').value || '').trim();
+  const dbService=getSelectedService();
+  const serviceName=String(dbService?.nazwa || $('service')?.options?.[$('service')?.selectedIndex]?.dataset?.name || '').trim();
+  const duration=Number(dbService?.czas_trwania || selectedServiceDuration || 0);
+  $('slots').innerHTML='<div class="empty">Pobieram godziny firmy…</div>';
+  if(!date || !serviceId || !dbService || !duration){ $('slots').innerHTML='<div class="empty">Wybierz usługę i dzień.</div>'; return; }
+  loadingSlots=true;
+  const workspaceAtStart=String(W);
+  try{
+    const cfgResult=await sb.rpc('public_get_booking_config',{p_workspace_id:workspaceAtStart});
+    if(String(W)!==workspaceAtStart)return;
+    if(cfgResult.error || !cfgResult.data || String(cfgResult.data.workspace_id)!==workspaceAtStart){
+      $('slots').innerHTML='<div class="empty"><span class="err">Nie udało się pobrać godzin tej firmy.</span></div>'; return;
     }
-
-    let list = (data || [])
-      .map(x => typeof x === 'string' ? x : x && x.slot_time)
-      .map(normalizeSlotTime)
-      .filter(Boolean)
-      .filter(t => !isPastSlot(date, t));
-
-    if (!list.length) {
-      $('slots').innerHTML = '<div class="empty"><b>Brak wolnych terminów.</b><br>Wybierz inny dzień lub usługę.</div>';
-      return;
-    }
-
-    $('slots').innerHTML = list.map(x => {
-      const t = typeof x === 'string' ? x : x.slot_time;
-      return `<button type="button" class="slot" data-time="${esc(t)}">${esc(t)}</button>`;
-    }).join('');
-
-    document.querySelectorAll('.slot').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.slot').forEach(x => x.classList.remove('selected'));
-        btn.classList.add('selected');
-        selected = btn.dataset.time;
-        updateBookState();
-        setMessage('Wybrany termin: <b>' + esc(formatDatePL(date)) + ' ' + esc(selected) + '</b>. Możesz teraz wysłać rezerwację.');
-      });
-    });
-  } finally {
-    loadingSlots = false;
-  }
+    const cfg=cfgResult.data;
+    const cfgServices=Array.isArray(cfg.services)?cfg.services:[];
+    const cfgService=cfgServices.find(s=>String(s.id||'').trim()===serviceId);
+    if(!cfgService || !cfgService.id){ $('slots').innerHTML='<div class="empty"><span class="err">Wybrana usługa nie należy do tej firmy.</span></div>'; return; }
+    const duration=Number(cfgService.czas_trwania);
+    if(!Number.isInteger(duration)||duration<1||duration>480){ $('slots').innerHTML='<div class="empty"><span class="err">Nieprawidłowy czas trwania wybranej usługi.</span></div>'; return; }
+    workHours=Array.isArray(cfg.hours)?cfg.hours.map(h=>({...h,aktywne:true})):[];
+    daysOff=Array.isArray(cfg.days_off)?cfg.days_off:[];
+    const state=renderDayMessage();
+    if(state==='off'){ $('slots').innerHTML='<div class="empty"><b>Brak terminów.</b><br>Wybrany dzień jest wolny.</div>'; return; }
+    if(state==='closed'){ $('slots').innerHTML='<div class="empty"><b>Brak terminów.</b><br>Firma nie ma aktywnych godzin pracy w tym dniu.</div>'; return; }
+    const {data,error}=await sb.rpc('get_available_slots',{p_workspace_id:workspaceAtStart,p_date:date,p_service_id:cfgService.id});
+    if(String(W)!==workspaceAtStart)return;
+    if(error){ $('slots').innerHTML='<div class="empty"><span class="err">Nie udało się pobrać wolnych godzin: '+esc(error.message)+'</span></div>'; return; }
+    const list=(Array.isArray(data)?data:[]).map(x=>normalizeSlotTime(typeof x==='string'?x:x?.slot_time)).filter(Boolean).filter(x=>!isPastSlot(date,x));
+    if(!list.length){ $('slots').innerHTML='<div class="empty"><b>Brak wolnych terminów.</b><br>Wybierz inny dzień lub usługę.</div>'; return; }
+    $('slots').innerHTML=list.map(x=>'<button type="button" class="slot" data-time="'+esc(x)+'">'+esc(x)+'</button>').join('');
+    document.querySelectorAll('.slot').forEach(btn=>btn.addEventListener('click',()=>{
+      document.querySelectorAll('.slot').forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); selected=btn.dataset.time; updateBookState();
+      setMessage('Wybrany termin: <b>'+esc(formatDatePL(date))+' '+esc(selected)+'</b>. Możesz teraz wysłać rezerwację.');
+    }));
+  }catch(e){ if(String(W)!==workspaceAtStart)return; $('slots').innerHTML='<div class="empty"><span class="err">Błąd pobierania godzin: '+esc(e?.message||e)+'</span></div>'; }
+  finally{ loadingSlots=false; }
 }
-
-
 function updateBookState() {
-  $('book').disabled = !(selected && $('rodo').checked);
+  $('book').disabled = !(selected && $('service').value && $('masseur').value && $('rodo').checked);
 }
 
 
 
 async function bookAppointment() {
-  if (loadingSlots) return;
+  if (loadingSlots || !W || selectedWorkspaceToken!==W) return;
 
-  const client = $('name').value.trim();
-  const date = $('date').value;
-  const time = selected;
   const masseur = $('masseur').value.trim();
-  const service = $('service').value.trim();
-  const duration = Number($('duration').value || 0);
+  const visitType = $('visitType').value.trim();
+  const date = $('date').value;
+  const name = $('name').value.trim();
   const phone = $('phone').value.trim();
   const email = $('email').value.trim();
   const note = $('note').value.trim();
-  const rodoConfirmed = $('rodo').checked;
-  const marketingConsent = $('marketing').checked;
+  const dbService = getSelectedService();
+  const serviceName = String(dbService?.nazwa || $('service')?.options?.[$('service')?.selectedIndex]?.dataset?.name || '').trim();
+  const duration = Number(dbService?.czas_trwania || selectedServiceDuration || 0);
 
-  if (!rodoConfirmed) {
+  if (!$('rodo').checked) {
     setMessage('<span class="err">Aby wysłać rezerwację, zapoznaj się z informacją RODO i zaznacz wymagane pole.</span>','err');
     return;
   }
 
-  if (!client || !date || !time || !masseur || !service) {
-    setMessage('<span class="err">Uzupełnij imię i nazwisko, datę, wybierz masażystę, rodzaj wizyty i dostępną godzinę.</span>','err');
+  if (!masseur || !visitType || !serviceName || !selected || !duration) {
+    setMessage('<span class="err">Wybierz masażystę, rodzaj wizyty, usługę i dostępną godzinę wizyty.</span>','err');
     return;
   }
 
-  if (!Number.isFinite(duration) || duration <= 0) {
-    setMessage('<span class="err">Wybierz prawidłowy czas trwania wizyty.</span>','err');
+  if (!dbService || !selectedServiceId) {
+    setMessage('<span class="err">Wybierz usługę.</span>','err');
     return;
   }
-
-  if (!phone || !email) {
-    setMessage('<span class="err">Uzupełnij telefon oraz e-mail.</span>','err');
+  if (!Number.isInteger(duration) || duration < 1 || duration > 480) {
+    setMessage('<span class="err">Nieprawidłowy czas wizyty dla wybranej firmy.</span>','err');
     return;
   }
-
+  if (!name || !phone || !email) {
+    setMessage('<span class="err">Uzupełnij imię i nazwisko, telefon oraz e-mail.</span>','err');
+    return;
+  }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     setMessage('<span class="err">Wpisz prawidłowy adres e-mail.</span>','err');
     return;
   }
-
-  if (isPastSlot(date, time)) {
-    setMessage('<span class="err">Wybrana godzina już minęła. Wybierz aktualnie dostępną godzinę.</span>','err');
-    await slots();
-    return;
-  }
-
   if (isDayOff(date)) {
     setMessage('<span class="err">Ten dzień jest wolny i nie można zarezerwować wizyty.</span>','err');
     await slots();
@@ -602,81 +575,69 @@ async function bookAppointment() {
   $('book').disabled = true;
   setMessage('Wysyłam rezerwację…');
 
-  try {
-    /*
-      Rezerwacja przez bezpieczną funkcję RPC.
-      Nie wykonujemy bezpośredniego INSERT do public.wizyty,
-      ponieważ klient publiczny działa z RLS i zapis bezpośredni
-      jest blokowany na Androidzie/iOS.
-    */
-    const { data: reservationId, error: visitError } = await sb.rpc('book_appointment_with_masseur', {
-      p_workspace_id: W,
-      p_client_name: client,
-      p_phone: phone,
-      p_email: email,
-      p_service: service,
-      p_date: date,
-      p_time: time.length === 5 ? time + ':00' : time,
-      p_duration: duration,
-      p_note: note,
-      p_masazysta: masseur
-    });
+  const {data: rezerwacjaId, error} = await sb.rpc('book_appointment', {
+    p_workspace_id: W,
+    p_client_name: name,
+    p_phone: phone,
+    p_email: email,
+    p_service: dbService.nazwa,
+    p_date: date,
+    p_time: selected,
+    p_duration: duration,
+    p_note: note,
+    p_masazysta: masseur,
+    p_rodzaj_wizyty: visitType
+  });
 
-    if (visitError) {
-      setMessage('<span class="err">Nie udało się dodać wizyty: ' + esc(visitError.message) + '</span>','err');
-      await slots();
-      return;
-    }
-
-    if (!reservationId) {
-      setMessage('<span class="err">Nie udało się utworzyć rezerwacji.</span>','err');
-      await slots();
-      return;
-    }
-
-    const rodoResult = await sb.rpc('zapisz_zgode_rodo', {
-      p_rezerwacja_id: reservationId,
-      p_workspace_id: W,
-      p_rodo_wersja: RODO_VERSION,
-      p_marketing_zgoda: marketingConsent
-    });
-
-    if (rodoResult.error) {
-      setMessage('<span class="err">Wizyta została zapisana, ale nie udało się zapisać zgody RODO: ' + esc(rodoResult.error.message) + '</span>','err');
-      await slots();
-      return;
-    }
-
-    const bookedTime = time;
-    setMessage(
-      `<span class="ok"><b>Rezerwacja wizyty została wysłana.</b><br>` +
-      `Termin: ${esc(formatDatePL(date))} ${esc(bookedTime)}.<br>` +
-      `Rezerwację Państwa wizyty potwierdzimy SMS.</span>`,
-      'ok'
-    );
-
-    $('name').value = '';
-    $('phone').value = '';
-    $('email').value = '';
-    $('note').value = '';
-    $('rodo').checked = false;
-    $('marketing').checked = false;
-    $('duration').value = '';
-    selected = '';
-    updateBookState();
+  if (error) {
+    setMessage('<span class="err">' + esc(error.message) + '</span>','err');
     await slots();
-
-  } catch (err) {
-    setMessage('<span class="err">Błąd dodawania wizyty: ' + esc(err?.message || err) + '</span>','err');
-    $('book').disabled = false;
+    return;
   }
+
+  if (!rezerwacjaId) {
+    setMessage('<span class="err">Rezerwacja została utworzona, ale baza nie zwróciła jej identyfikatora. Zgoda RODO nie została zapisana.</span>','err');
+    await slots();
+    return;
+  }
+
+  const {error: rodoError} = await sb.rpc('zapisz_zgode_rodo', {
+    p_rezerwacja_id: rezerwacjaId,
+    p_workspace_id: W,
+    p_rodo_wersja: RODO_VERSION,
+    p_marketing_zgoda: $('marketing').checked
+  });
+
+  if (rodoError) {
+    setMessage('<span class="err">Rezerwacja została utworzona, ale nie udało się zapisać zgody RODO: ' + esc(rodoError.message) + '</span>','err');
+    await slots();
+    return;
+  }
+
+  const bookedTime = selected;
+  setMessage(`<span class="ok"><b>Rezerwacja wizyty została wysłana.</b><br>Termin: ${esc(formatDatePL(date))} ${esc(bookedTime)}.<br>Rodzaj wizyty: <b>${esc(visitType)}</b><br>Usługa: <b>${esc(serviceName)}</b><br>Pracownik: <b>${esc(masseur)}</b><br>Państwa rezerwację wizyty potwierdzimy SMS'em.</span>`,'ok');
+  $('name').value = '';
+  $('phone').value = '';
+  $('email').value = '';
+  $('note').value = '';
+  $('rodo').checked = false;
+  $('marketing').checked = false;
+  selectedServiceId=''; selectedServiceDuration=0;
+  $('service').value = '';
+  $('masseur').value = '';
+  $('visitType').value = '';
+  updateBookState();
+  await slots();
 }
 
+$('masseur').addEventListener('change', updateBookState);
+$('visitType').addEventListener('change', updateBookState);
 $('service').addEventListener('change', () => {
+  syncServiceSelection();
   slots();
+  updateBookState();
 });
 $('date').addEventListener('change', slots);
-$('duration').addEventListener('change', slots);
 $('book').addEventListener('click', bookAppointment);
 
 
@@ -704,14 +665,7 @@ document.addEventListener('keydown', e => {
   $('date').min = t;
   $('date').value = t;
   updateBookState();
-  setMessage('Łączenie z bazą online…');
-
-  const okSettings = await loadClientSettings();
-  const okServices = await loadServices();
-  const okRules = await loadRules();
-  if (!okServices || !okRules) return;
-
-  await slots();
+  await selectFixedCompany();
 })();
 </script>
 <script>
